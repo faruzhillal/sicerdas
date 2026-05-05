@@ -1,0 +1,97 @@
+{
+  "entities": {
+    "user": {
+      "title": "User Profile",
+      "description": "Information about a user (student or admin)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "studentId": { "type": "string" },
+        "class": { "type": "string" },
+        "photoURL": { "type": "string" }
+      },
+      "required": ["uid", "fullName", "email", "role"]
+    },
+    "studentRanking": {
+      "title": "Student Ranking",
+      "description": "Ranking data for a student in a specific class",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "class": { "type": "string" },
+        "score": { "type": "number" },
+        "rank": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "studentName", "class", "score", "rank"]
+    },
+    "scholarship": {
+      "title": "Scholarship",
+      "description": "Scholarship programs and recipients",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "closed", "announced"] },
+        "recipients": { "type": "array" }
+      },
+      "required": ["id", "name", "status"]
+    },
+    "scholarshipApplication": {
+      "title": "Scholarship Application",
+      "description": "application for a scholarship submitted by a student",
+      "type": "object",
+      "properties": {
+        "scholarshipId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "submittedAt": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" }
+      },
+      "required": ["scholarshipId", "studentId", "status"]
+    },
+    "complaint": {
+      "title": "Complaint",
+      "description": "Student complaint or feedback",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "message": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string", "enum": ["new", "in_progress", "resolved"] },
+        "submittedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "message", "status"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "user",
+      "description": "Collection of user profiles"
+    },
+    "rankings": {
+      "schema": "studentRanking",
+      "description": "Collection of student rankings per class"
+    },
+    "scholarships": {
+      "schema": "scholarship",
+      "description": "Collection of scholarship programs"
+    },
+    "scholarship_applications": {
+      "schema": "scholarshipApplication",
+      "description": "Applications for scholarships"
+    },
+    "complaints": {
+      "schema": "complaint",
+      "description": "Collection of student complaints"
+    }
+  }
+}
