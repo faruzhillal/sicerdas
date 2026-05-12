@@ -10,8 +10,15 @@
         "email": { "type": "string" },
         "role": { "type": "string", "enum": ["student", "admin"] },
         "studentId": { "type": "string" },
+        "nisn": { "type": "string" },
         "class": { "type": "string" },
-        "photoURL": { "type": "string" }
+        "photoURL": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "parentName": { "type": "string" },
+        "parentJob": { "type": "string" },
+        "parentIncome": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive"] }
       },
       "required": ["uid", "fullName", "email", "role"]
     },
@@ -45,21 +52,38 @@
     },
     "scholarshipApplication": {
       "title": "Scholarship Application",
-      "description": "application for a scholarship submitted by a student",
+      "description": "Information provided by student when applying for a scholarship",
       "type": "object",
       "properties": {
         "scholarshipId": { "type": "string" },
+        "scholarshipName": { "type": "string" },
         "studentId": { "type": "string" },
         "studentName": { "type": "string" },
+        "studentClass": { "type": "string" },
+        "nisn": { "type": "string" },
+        "parentName": { "type": "string" },
+        "parentJob": { "type": "string" },
+        "parentIncome": { "type": "string" },
+        "criteriaValues": {
+          "type": "object",
+          "properties": {
+            "gpa": { "type": "number", "description": "Nilai Rata-rata / IPK (0-100)" },
+            "parentIncomeValue": { "type": "number", "description": "Nilai penghasilan untuk perhitungan (1-5)" },
+            "dependents": { "type": "number", "description": "Jumlah tanggungan orang tua" },
+            "achievements": { "type": "number", "description": "Skor prestasi (1-5)" }
+          }
+        },
+        "notes": { "type": "string" },
+        "declaration": { "type": "boolean" },
         "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
-        "submittedAt": { "type": "string", "format": "date-time" },
-        "notes": { "type": "string" }
+        "adminComment": { "type": "string" },
+        "submittedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["scholarshipId", "studentId", "status"]
+      "required": ["scholarshipId", "studentId", "nisn", "parentName", "parentIncome", "declaration"]
     },
     "complaint": {
-      "title": "Complaint",
-      "description": "Student complaint or feedback",
+      "title": "Student Complaint",
+      "description": "Complaints filed by students",
       "type": "object",
       "properties": {
         "studentId": { "type": "string" },
@@ -67,9 +91,24 @@
         "message": { "type": "string" },
         "category": { "type": "string" },
         "status": { "type": "string", "enum": ["new", "in_progress", "resolved"] },
+        "adminReply": { "type": "string" },
+        "repliedAt": { "type": "string" },
         "submittedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["studentId", "message", "status"]
+    },
+    "criterion": {
+      "title": "Scoring Criterion",
+      "description": "Definition of a scoring criterion with weight",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "weight": { "type": "number" },
+        "type": { "type": "string", "enum": ["benefit", "cost"] },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "name", "weight", "type"]
     }
   },
   "firestore": {
@@ -80,6 +119,14 @@
     "rankings": {
       "schema": "studentRanking",
       "description": "Collection of student rankings per class"
+    },
+    "criteria": {
+      "schema": "criterion",
+      "description": "Definitions of criteria used for scoring"
+    },
+    "criteria_scores": {
+      "schema": "object",
+      "description": "Scores for each criterion per student"
     },
     "scholarships": {
       "schema": "scholarship",

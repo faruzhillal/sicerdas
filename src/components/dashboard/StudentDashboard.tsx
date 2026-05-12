@@ -1,10 +1,109 @@
-import { Trophy, GraduationCap, MessageSquare, Clock, ArrowRight } from 'lucide-react';
+import { Trophy, GraduationCap, MessageSquare, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import StatCard from './StatCard';
 import { motion } from 'motion/react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { collection, query, where, getDocs, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 export default function StudentDashboard() {
-  const { profile } = useAuth();
+  const { profile, currentUser } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    rank: '-',
+    avgScore: '0',
+    scholarshipStatus: 'Belum Ada'
+  });
+  const [activities, setActivities] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!currentUser) return;
+      try {
+        setLoading(true);
+        
+        // 1. Fetch Rank
+        const rankingDoc = await getDoc(doc(db, 'rankings', currentUser.uid));
+        const rankData = rankingDoc.data();
+
+        // 2. Fetch Scores for average
+        const scoresDoc = await getDoc(doc(db, 'criteria_scores', currentUser.uid));
+        const scoresData = scoresDoc.data() || {};
+        
+        let total = 0;
+        let count = 0;
+        Object.keys(scoresData).forEach(k => {
+          if (typeof scoresData[k] === 'number') {
+            total += scoresData[k];
+            count++;
+          }
+        });
+        const average = count > 0 ? (total / count).toFixed(1) : '0';
+
+        // 3. Fetch Applications
+        const appQuery = query(
+          collection(db, 'scholarship_applications'),
+          where('studentId', '==', currentUser.uid),
+          orderBy('submittedAt', 'desc'),
+          limit(3)
+        );
+        const appSnap = await getDocs(appQuery);
+        const appList = appSnap.docs.map(d => ({ 
+          id: d.id, 
+          title: `Pendaftaran ${d.data().scholarshipName}`,
+          type: 'Beasiswa',
+          date: new Date(d.data().submittedAt).toLocaleDateString('id-ID'),
+          status: d.data().status === 'pending' ? 'Menunggu' : d.data().status === 'approved' ? 'Disetujui' : 'Ditolak'
+        }));
+
+        // 4. Fetch Complaints
+        const compQuery = query(
+          collection(db, 'complaints'),
+          where('studentId', '==', currentUser.uid),
+          orderBy('submittedAt', 'desc'),
+          limit(2)
+        );
+        const compSnap = await getDocs(compQuery);
+        const compList = compSnap.docs.map(d => ({
+          id: d.id,
+          title: `Aduan: ${d.data().category}`,
+          type: 'Aduan',
+          date: new Date(d.data().submittedAt).toLocaleDateString('id-ID'),
+          status: d.data().status === 'new' ? 'Baru' : d.data().status === 'in_progress' ? 'Diproses' : 'Selesai'
+        }));
+
+        setStats({
+          rank: rankData ? `#${rankData.rank || '?'}` : '-',
+          avgScore: average,
+          scholarshipStatus: appList.length > 0 ? appList[0].status : 'Belum Ada'
+        });
+
+        // Combine activities (mock score updates for UI flair)
+        const allActivities = [
+          ...appList,
+          ...compList,
+        ];
+        
+        if (allActivities.length === 0) {
+          allActivities.push({ id: 'welcome', title: 'Selamat Datang!', type: 'Akademik', date: 'Hari ini', status: 'Baru' });
+        }
+
+        setActivities(allActivities);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [currentUser]);
+
+  if (loading) return (
+    <div className="h-[60vh] flex items-center justify-center">
+      <Loader2 className="animate-spin text-indigo-600" size={32} />
+    </div>
+  );
 
   return (
     <div className="space-y-12">
@@ -12,21 +111,20 @@ export default function StudentDashboard() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard 
           label="Peringkat Kelas" 
-          value={`#${profile?.class === '1A' ? '4' : '??'}`} 
+          value={stats.rank} 
           icon={Trophy} 
-          trend="Top 10%" 
+          trend="SPK Score" 
           color="amber"
         />
         <StatCard 
           label="Rata-rata Nilai" 
-          value="92.5" 
+          value={stats.avgScore} 
           icon={Clock} 
-          trend="+2.4" 
           color="indigo"
         />
         <StatCard 
           label="Status Beasiswa" 
-          value="Menunggu" 
+          value={stats.scholarshipStatus} 
           icon={GraduationCap} 
           color="green"
         />
@@ -38,14 +136,10 @@ export default function StudentDashboard() {
           <section>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Perkembangan Terakhir</h2>
-              <button className="text-sm font-bold text-indigo-600 hover:underline">Lihat Rapor</button>
+              <button className="text-sm font-bold text-indigo-600 hover:underline">Lihat Semua</button>
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-100 divide-y divide-slate-50 overflow-hidden shadow-sm">
-              {[
-                { title: 'Nilai Matematika Diperbarui', type: 'Akademik', date: '2 jam yang lalu', value: '95' },
-                { title: 'Pendaftaran Beasiswa Tahfidz', type: 'Beasiswa', date: 'Kemarin', status: 'Verifikasi' },
-                { title: 'Aduan Fasilitas Kantin', type: 'Aduan', date: '3 hari yang lalu', status: 'Diproses' },
-              ].map((item, i) => (
+              {activities.map((item, i) => (
                 <div key={i} className="flex items-center justify-between p-6 hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
@@ -57,13 +151,9 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    {item.value ? (
-                      <span className="text-lg font-black text-indigo-600">{item.value}</span>
-                    ) : (
-                      <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-widest">
-                        {item.status}
-                      </span>
-                    )}
+                    <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-widest">
+                      {item.status}
+                    </span>
                   </div>
                 </div>
               ))}

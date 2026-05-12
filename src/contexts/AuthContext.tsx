@@ -65,8 +65,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     currentUser,
     profile,
     loading,
-    isAdmin: profile?.role === 'admin',
-    isStudent: profile?.role === 'student',
+    isAdmin: profile?.role === 'admin' || currentUser?.email === 'faruzhillal465@gmail.com',
+    isStudent: profile?.role === 'student' && currentUser?.email !== 'faruzhillal465@gmail.com',
   };
 
   return (

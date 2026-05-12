@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { motion } from 'motion/react';
-import { Trophy, Medal, Search, Filter, ArrowUpRight, User } from 'lucide-react';
+import { Trophy, Medal, Search, Filter, ArrowUpRight, User, BarChart as ChartIcon } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface Ranking {
   id: string;
@@ -13,17 +14,29 @@ interface Ranking {
   rank: number;
 }
 
+interface Criterion {
+  id: string;
+  name: string;
+  weight: number;
+}
+
 const CLASSES = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'];
 
 export default function RankingPage() {
   const [rankings, setRankings] = useState<Ranking[]>([]);
+  const [criteria, setCriteria] = useState<Criterion[]>([]);
   const [selectedClass, setSelectedClass] = useState('1A');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRankings = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
+        // Fetch criteria
+        const criteriaSnapshot = await getDocs(collection(db, 'criteria'));
+        const criteriaData = criteriaSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Criterion));
+        setCriteria(criteriaData);
+
         const q = query(
           collection(db, 'rankings'),
           where('class', '==', selectedClass),
@@ -53,8 +66,13 @@ export default function RankingPage() {
       }
     };
 
-    fetchRankings();
+    fetchData();
   }, [selectedClass]);
+
+  const top10 = rankings.slice(0, 10).map(r => ({
+    name: r.studentName.split(' ')[0],
+    score: r.score
+  }));
 
   return (
     <div className="py-20 px-4 max-w-7xl mx-auto">
@@ -92,26 +110,73 @@ export default function RankingPage() {
           </div>
 
           <div className="pt-6 border-t border-slate-100">
-            <h3 className="text-sm font-bold text-slate-900 mb-4 tracking-tight">Kriteria Penilaian</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-4 tracking-tight">Kriteria Penilaian SPK</h3>
             <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-xs text-slate-500">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                Akademik (70%)
-              </li>
-              <li className="flex items-center gap-2 text-xs text-slate-500">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                Kepribadian (20%)
-              </li>
-              <li className="flex items-center gap-2 text-xs text-slate-500">
-                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
-                Ekstrakurikuler (10%)
-              </li>
+              {criteria.map((c, i) => (
+                <li key={c.id} className="flex items-center gap-2 text-xs text-slate-500">
+                  <div className={cn(
+                    "w-1.5 h-1.5 rounded-full",
+                    i % 3 === 0 ? "bg-indigo-500" : i % 3 === 1 ? "bg-emerald-500" : "bg-amber-500"
+                  )} />
+                  {c.name} ({(c.weight * 100).toFixed(0)}%)
+                </li>
+              ))}
+              {criteria.length === 0 && (
+                <li className="text-xs text-slate-400 italic">Belum ada kriteria diatur</li>
+              )}
             </ul>
           </div>
         </div>
 
         {/* Main Ranking List */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 space-y-8">
+          {!loading && rankings.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm"
+            >
+              <div className="flex items-center gap-2 mb-6">
+                <ChartIcon size={16} className="text-indigo-600" />
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Distribusi Skor Top 10</h3>
+              </div>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={top10}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
+                      dy={10}
+                    />
+                    <YAxis hide domain={[0, 'dataMax + 100']} />
+                    <Tooltip 
+                      cursor={{ fill: '#f8fafc' }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-xl">
+                              <p>{payload[0].payload.name}</p>
+                              <p className="text-indigo-400">{payload[0].value} Poin</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="score" radius={[4, 4, 0, 0]} barSize={40}>
+                      {top10.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index === 0 ? '#6366f1' : index < 3 ? '#818cf8' : '#e2e8f0'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </motion.div>
+          )}
+
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3, 4, 5].map(i => (

@@ -1,25 +1,29 @@
 import { Users, FileText, CheckCircle, Clock, Plus, BarChart3, Settings } from 'lucide-react';
 import StatCard from './StatCard';
 import { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { cn } from '../../lib/utils';
+import { Link } from 'react-router-dom';
 
 export default function AdminDashboard() {
-  const [counts, setCounts] = useState({ students: 0, scholarships: 0, complaints: 0 });
+  const [counts, setCounts] = useState({ students: 0, scholarships: 0, complaints: 0, applications: 0 });
   const [recentComplaints, setRecentComplaints] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const studentDocs = await getDocs(collection(db, 'users'));
+        const studentQuery = query(collection(db, 'users'), where('role', '==', 'student'));
+        const studentDocs = await getDocs(studentQuery);
         const schDocs = await getDocs(collection(db, 'scholarships'));
         const compDocs = await getDocs(collection(db, 'complaints'));
+        const appDocs = await getDocs(collection(db, 'scholarship_applications'));
         
         setCounts({
           students: studentDocs.size,
           scholarships: schDocs.size,
-          complaints: compDocs.size
+          complaints: compDocs.size,
+          applications: appDocs.size
         });
 
         // Mock if empty for display
@@ -41,19 +45,22 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-12">
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard label="Total Siswa" value={counts.students || 450} icon={Users} color="indigo" />
-        <StatCard label="Pendaftar Beasiswa" value={124} icon={CheckCircle} color="green" />
-        <StatCard label="Aduan Masuk" value={counts.complaints || 8} icon={Clock} color="red" />
-        <StatCard label="Program Aktif" value={counts.scholarships || 4} icon={BarChart3} color="amber" />
+        <StatCard label="Total Siswa" value={counts.students} icon={Users} color="indigo" />
+        <StatCard label="Pendaftar Beasiswa" value={counts.applications} icon={CheckCircle} color="green" />
+        <StatCard label="Aduan Masuk" value={counts.complaints} icon={Clock} color="red" />
+        <StatCard label="Program Aktif" value={counts.scholarships} icon={BarChart3} color="amber" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
         <section className="lg:col-span-2">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Daftar Aduan Terkini</h2>
-            <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100">
+            <Link 
+              to="/dashboard/complaints"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100"
+            >
               Lihat Semua
-            </button>
+            </Link>
           </div>
           <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
@@ -103,17 +110,21 @@ export default function AdminDashboard() {
                <h3 className="text-xl font-bold mb-6">Quick Actions</h3>
                <div className="space-y-3">
                  {[
-                   { label: 'Update Data Peringkat', icon: Plus, color: 'bg-indigo-600' },
-                   { label: 'Tambah Beasiswa', icon: FileText, color: 'bg-green-600' },
-                   { label: 'Laporan Bulanan', icon: BarChart3, color: 'bg-slate-700' },
-                   { label: 'Pengaturan Sistem', icon: Settings, color: 'bg-slate-700' },
+                   { label: 'Update Data Peringkat', icon: Plus, color: 'bg-indigo-600', path: '/dashboard/scores' },
+                   { label: 'Tambah Beasiswa', icon: FileText, color: 'bg-green-600', path: '/dashboard/scholarships' },
+                   { label: 'Laporan Bulanan', icon: BarChart3, color: 'bg-slate-700', path: '/dashboard' },
+                   { label: 'Pengaturan Sistem', icon: Settings, color: 'bg-slate-700', path: '/dashboard' },
                  ].map((action, i) => (
-                   <button key={i} className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group">
+                   <Link 
+                     key={i} 
+                     to={action.path}
+                     className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group"
+                   >
                      <span className="text-sm font-bold text-white/80 group-hover:text-white transition-colors">{action.label}</span>
                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", action.color)}>
                        <action.icon size={16} />
                      </div>
-                   </button>
+                   </Link>
                  ))}
                </div>
            </div>
