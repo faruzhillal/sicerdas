@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { GraduationCap, Clock, CheckCircle2, XCircle, Search, Filter, Loader2, User, Wallet, FileText, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { handleFirestoreError, OperationType } from '../../../lib/firebase-errors';
 import { cn } from '../../../lib/utils';
 
@@ -39,8 +40,6 @@ export default function ApplicationManager() {
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [adminComment, setAdminComment] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [isRankingMode, setIsRankingMode] = useState(false);
-  const [rankedApps, setRankedApps] = useState<Application[]>([]);
 
   useEffect(() => {
     // Fetch unique scholarships for filter
@@ -62,49 +61,6 @@ export default function ApplicationManager() {
 
     return () => unsubscribe();
   }, []);
-
-  const calculateSAW = () => {
-    if (scholarshipFilter === 'all') {
-      alert("Silakan pilih program beasiswa spesifik untuk melakukan pemeringkatan.");
-      return;
-    }
-
-    const appsToRank = applications.filter(app => app.scholarshipId === scholarshipFilter && app.status === 'pending');
-    
-    if (appsToRank.length === 0) {
-      alert("Tidak ada pengajuan 'Menunggu' untuk program ini.");
-      return;
-    }
-
-    // SAW Logic
-    const weights = { gpa: 0.4, income: 0.3, dependents: 0.2, achievements: 0.1 };
-    
-    // 1. Find Max/Min
-    const maxGPA = Math.max(...appsToRank.map(a => a.criteriaValues?.gpa || 0), 0.0001);
-    const minIncome = Math.min(...appsToRank.map(a => a.criteriaValues?.parentIncomeValue || 5), 5);
-    const maxDeps = Math.max(...appsToRank.map(a => a.criteriaValues?.dependents || 0), 0.0001);
-    const maxAch = Math.max(...appsToRank.map(a => a.criteriaValues?.achievements || 1), 1);
-
-    // 2. Normalize and Multiply
-    const ranked = appsToRank.map(app => {
-      const c = app.criteriaValues || { gpa: 0, parentIncomeValue: 5, dependents: 0, achievements: 1 };
-      
-      const normGPA = c.gpa / maxGPA;
-      const normIncome = minIncome / (c.parentIncomeValue || 5);
-      const normDeps = c.dependents / maxDeps;
-      const normAch = c.achievements / maxAch;
-
-      const totalScore = (normGPA * weights.gpa) + (normIncome * weights.income) + (normDeps * weights.dependents) + (normAch * weights.achievements);
-
-      return {
-        ...app,
-        spkScore: totalScore
-      };
-    }).sort((a, b) => (b.spkScore || 0) - (a.spkScore || 0));
-
-    setRankedApps(ranked);
-    setIsRankingMode(true);
-  };
 
   const handleStatusUpdate = async (id: string, newStatus: 'approved' | 'rejected') => {
     try {
@@ -139,21 +95,12 @@ export default function ApplicationManager() {
           <p className="text-slate-500 text-sm">Review dan tentukan status pengajuan beasiswa siswa.</p>
         </div>
         <div className="flex gap-2">
-          {isRankingMode ? (
-            <button 
-              onClick={() => setIsRankingMode(false)}
-              className="px-4 py-2 bg-slate-900 text-white rounded-lg font-bold text-xs uppercase tracking-widest"
-            >
-              Kembali ke Daftar
-            </button>
-          ) : (
-            <button 
-              onClick={calculateSAW}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold text-xs flex items-center gap-2 uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-indigo-100"
-            >
-              <Zap size={14} /> Ranking (SPK SAW)
-            </button>
-          )}
+          <Link 
+            to="/dashboard/scholarship-saw"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold text-xs flex items-center gap-2 uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-indigo-100"
+          >
+            <Zap size={14} /> Proses Seleksi SAW
+          </Link>
         </div>
       </div>
 
@@ -197,23 +144,17 @@ export default function ApplicationManager() {
         <div className="space-y-4">
           {loading ? (
             <div className="flex items-center justify-center p-12 text-slate-400 italic">Memuat pengajuan...</div>
-          ) : (isRankingMode ? rankedApps : filteredApps).length === 0 ? (
+          ) : filteredApps.length === 0 ? (
             <div className="flex items-center justify-center p-12 text-slate-400 italic">Tidak ada pengajuan ditemukan.</div>
-          ) : (isRankingMode ? rankedApps : filteredApps).map((app, index) => (
+          ) : filteredApps.map((app, index) => (
             <div 
               key={app.id} 
               onClick={() => setSelectedApp(app)}
               className={cn(
                 "p-5 rounded-2xl border transition-all cursor-pointer hover:shadow-md relative",
-                selectedApp?.id === app.id ? 'bg-indigo-50 border-indigo-200 ring-1 ring-indigo-200' : 'bg-white border-slate-100',
-                isRankingMode && index === 0 && "border-indigo-400 ring-1 ring-indigo-400 shadow-lg shadow-indigo-100"
+                selectedApp?.id === app.id ? 'bg-indigo-50 border-indigo-200 ring-1 ring-indigo-200' : 'bg-white border-slate-100'
               )}
             >
-              {isRankingMode && (
-                <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-black shadow-lg">
-                  {index + 1}
-                </div>
-              )}
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
@@ -232,11 +173,6 @@ export default function ApplicationManager() {
                   }`}>
                     {app.status === 'pending' ? 'Menunggu' : app.status === 'approved' ? 'Disetujui' : 'Ditolak'}
                   </div>
-                  {isRankingMode && (
-                    <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">
-                      Skor: {app.spkScore?.toFixed(4)}
-                    </div>
-                  )}
                 </div>
               </div>
               <div className="flex items-center justify-between">
@@ -288,65 +224,94 @@ export default function ApplicationManager() {
               </div>
 
               <div className="p-6 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <div className="flex items-center gap-2 mb-1 text-slate-400">
-                      <User size={12} />
-                      <p className="text-[9px] font-bold uppercase tracking-widest">Orang Tua / Wali</p>
-                    </div>
-                    <p className="text-xs font-bold text-slate-900">{selectedApp.parentName}</p>
-                    <p className="text-[9px] text-slate-500">{selectedApp.parentJob}</p>
+                {/* Section: Siswa */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <User size={14} />
+                    <p className="text-[10px] font-black uppercase tracking-widest">Detail Profil Siswa</p>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <div className="flex items-center gap-2 mb-1 text-slate-400">
-                      <Wallet size={12} />
-                      <p className="text-[9px] font-bold uppercase tracking-widest">Penghasilan</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-slate-50 rounded-xl">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">NISN</p>
+                      <p className="text-xs font-black text-slate-900">{selectedApp.nisn}</p>
                     </div>
-                    <p className="text-xs font-bold text-slate-900">{selectedApp.parentIncome}</p>
+                    <div className="p-3 bg-slate-50 rounded-xl">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Waktu Daftar</p>
+                      <p className="text-xs font-black text-slate-900">{new Date(selectedApp.submittedAt).toLocaleString('id-ID')}</p>
+                    </div>
                   </div>
                 </div>
 
+                {/* Section: Orang Tua */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Wallet size={14} />
+                    <p className="text-[10px] font-black uppercase tracking-widest">Data Orang Tua / Wali</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-slate-50 rounded-xl col-span-2">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nama Ayah/Ibu/Wali</p>
+                      <p className="text-xs font-black text-slate-900">{selectedApp.parentName}</p>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pekerjaan</p>
+                      <p className="text-xs font-black text-slate-900">{selectedApp.parentJob}</p>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Penghasilan</p>
+                      <p className="text-xs font-black text-slate-900">{selectedApp.parentIncome}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section: SPK */}
                 {selectedApp.criteriaValues && (
                   <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
                     <div className="flex items-center gap-2 mb-3 text-indigo-900">
                       <Zap size={14} />
                       <p className="text-[10px] font-black uppercase tracking-widest">Data Kriteria (SPK)</p>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="text-center">
                         <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">GPA</p>
                         <p className="text-sm font-black text-indigo-600">{selectedApp.criteriaValues.gpa}</p>
                       </div>
-                      <div className="text-center border-x border-indigo-100">
-                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Dep</p>
+                      <div className="text-center">
+                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Tanggungan</p>
                         <p className="text-sm font-black text-indigo-600">{selectedApp.criteriaValues.dependents}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Ach</p>
+                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Prestasi</p>
                         <p className="text-sm font-black text-indigo-600">{selectedApp.criteriaValues.achievements}</p>
                       </div>
+                      <div className="text-center">
+                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Nilai Inc</p>
+                        <p className="text-sm font-black text-indigo-600">{selectedApp.criteriaValues.parentIncomeValue}</p>
+                      </div>
                     </div>
+                    <p className="mt-3 text-[8px] text-indigo-400 italic text-center">Data di atas digunakan untuk pemeringkatan SAW secara otomatis.</p>
                   </div>
                 )}
 
+                {/* Section: Alasan */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-slate-400">
                     <FileText size={14} />
-                    <p className="text-[10px] font-bold uppercase tracking-widest">Alasan Mengajukan</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest">Alasan Mengajukan Beasiswa</p>
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-xl text-xs text-slate-600 leading-relaxed italic">
-                    "{selectedApp.notes || 'Tidak ada catatan'}"
+                  <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-600 leading-relaxed italic">
+                    "{selectedApp.notes || 'Tidak ada catatan alasan yang diberikan.'}"
                   </div>
                 </div>
 
-                <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="space-y-4 pt-4 border-t border-slate-200">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Berikan Tanggapan / Alasan (Opsional)</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Komentar / Feedback Admin</label>
                     <textarea 
                       value={adminComment}
                       onChange={(e) => setAdminComment(e.target.value)}
                       placeholder="Contoh: Dokumen lengkap, segera diverifikasi..."
-                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm min-h-[80px]"
                     />
                   </div>
 
@@ -354,16 +319,16 @@ export default function ApplicationManager() {
                     <button 
                       onClick={() => handleStatusUpdate(selectedApp.id, 'rejected')}
                       disabled={processingId === selectedApp.id}
-                      className="py-3 px-4 border border-rose-200 text-rose-600 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-rose-50 transition-all text-sm disabled:opacity-50"
+                      className="py-3 px-4 border-2 border-rose-100 text-rose-600 rounded-xl font-black flex items-center justify-center gap-2 hover:bg-rose-50 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50"
                     >
-                      <XCircle size={18} /> Tolak
+                      <XCircle size={16} /> Tolak Pengajuan
                     </button>
                     <button 
                       onClick={() => handleStatusUpdate(selectedApp.id, 'approved')}
                       disabled={processingId === selectedApp.id}
-                      className="py-3 px-4 bg-emerald-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all text-sm disabled:opacity-50 shadow-lg shadow-emerald-100"
+                      className="py-3 px-4 bg-emerald-600 text-white rounded-xl font-black flex items-center justify-center gap-2 hover:bg-slate-900 transition-all text-[10px] uppercase tracking-widest disabled:opacity-50 shadow-lg shadow-emerald-100"
                     >
-                      <CheckCircle2 size={18} /> Setujui
+                      <CheckCircle2 size={16} /> Setujui Sekarang
                     </button>
                   </div>
                 </div>

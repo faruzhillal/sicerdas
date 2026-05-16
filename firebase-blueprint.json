@@ -97,6 +97,19 @@
       },
       "required": ["studentId", "message", "status"]
     },
+    "complaintChat": {
+      "title": "Complaint Chat Message",
+      "description": "Individual messages in a complaint thread",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderRole": { "type": "string", "enum": ["student", "admin"] },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "senderRole", "message", "timestamp"]
+    },
     "criterion": {
       "title": "Scoring Criterion",
       "description": "Definition of a scoring criterion with weight",
@@ -109,6 +122,17 @@
         "description": { "type": "string" }
       },
       "required": ["id", "name", "weight", "type"]
+    },
+    "class": {
+      "title": "School Class",
+      "description": "Available school classes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "name"]
     }
   },
   "firestore": {
@@ -139,6 +163,14 @@
     "complaints": {
       "schema": "complaint",
       "description": "Collection of student complaints"
+    },
+    "complaints/{complaintId}/messages": {
+      "schema": "complaintChat",
+      "description": "Subcollection of chat messages for a specific complaint"
+    },
+    "classes": {
+      "schema": "class",
+      "description": "Collection of school classes"
     }
   }
 }

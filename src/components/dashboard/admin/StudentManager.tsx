@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, where, doc, updateDoc, deleteDoc, setDoc, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, updateDoc, deleteDoc, setDoc, addDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { Users, UserPlus, Search, MoreVertical, Edit2, Trash2, X, Loader2 } from 'lucide-react';
 import { handleFirestoreError, OperationType } from '../../../lib/firebase-errors';
@@ -14,10 +14,9 @@ interface Student {
   role: 'student';
 }
 
-const CLASSES = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'];
-
 export default function StudentManager() {
   const [students, setStudents] = useState<Student[]>([]);
+  const [classes, setClasses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -28,13 +27,23 @@ export default function StudentManager() {
     fullName: '',
     studentId: '',
     email: '',
-    class: '1A',
+    class: '',
     role: 'student'
   });
 
   useEffect(() => {
+    // Fetch classes
+    const classQuery = query(collection(db, 'classes'), orderBy('name', 'asc'));
+    const unsubscribeClasses = onSnapshot(classQuery, (snapshot) => {
+      const classList = snapshot.docs.map(d => d.data().name as string);
+      setClasses(classList);
+      if (classList.length > 0 && !formData.class) {
+        setFormData(prev => ({ ...prev, class: classList[0] }));
+      }
+    });
+
     const q = query(collection(db, 'users'), where('role', '==', 'student'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribeStudents = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as Student));
       setStudents(data);
       setLoading(false);
@@ -42,7 +51,11 @@ export default function StudentManager() {
       console.error("Error fetching students:", error);
       setLoading(false);
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribeClasses();
+      unsubscribeStudents();
+    };
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -62,7 +75,7 @@ export default function StudentManager() {
       }
       setShowForm(false);
       setEditingId(null);
-      setFormData({ fullName: '', studentId: '', email: '', class: '1A', role: 'student' });
+      setFormData({ fullName: '', studentId: '', email: '', class: classes[0] || '', role: 'student' });
     } catch (error) {
       handleFirestoreError(error, editingId ? OperationType.UPDATE : OperationType.CREATE, 'users');
     } finally {
@@ -96,7 +109,7 @@ export default function StudentManager() {
         <button 
           onClick={() => {
             setEditingId(null);
-            setFormData({ fullName: '', studentId: '', email: '', class: '1A', role: 'student' });
+            setFormData({ fullName: '', studentId: '', email: '', class: classes[0] || '', role: 'student' });
             setShowForm(true);
           }}
           className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100"
@@ -144,7 +157,11 @@ export default function StudentManager() {
                     onChange={e => setFormData({ ...formData, class: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {classes.length > 0 ? (
+                      classes.map(c => <option key={c} value={c}>{c}</option>)
+                    ) : (
+                      <option disabled>Tambahkan kelas di menu Kelola Kelas</option>
+                    )}
                   </select>
                 </div>
               </div>
@@ -160,12 +177,13 @@ export default function StudentManager() {
               </div>
               <button 
                 type="submit" 
-                disabled={saving}
+                disabled={saving || classes.length === 0}
                 className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-slate-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 size={18} className="animate-spin" />}
                 {editingId ? 'Simpan Perubahan' : 'Tambah Siswa'}
               </button>
+              {classes.length === 0 && <p className="text-[10px] text-rose-500 italic text-center">Silakan buat kelas terlebih dahulu di menu Kelola Kelas.</p>}
             </form>
           </div>
         </div>

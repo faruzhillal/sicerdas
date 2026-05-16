@@ -166,8 +166,10 @@ export default function LoginPage() {
       setError('Email sudah terdaftar. Silakan masuk.');
     } else if (err.code === 'auth/weak-password') {
       setError('Password terlalu lemah (minimal 6 karakter).');
-    } else if (err.code === 'auth/user-cancelled' || err.code === 'auth/popup-closed-by-user') {
-      setError('Login dibatalkan.');
+    } else if (err.code === 'auth/user-cancelled' || err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+      // These are benign errors usually caused by user action or double clicking
+      console.log('Auth popup cancelled or closed.');
+      return; // Silent return to avoid showing scary error messages for user-initiated cancellation
     } else if (err.code === 'auth/popup-blocked') {
       setError('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
     } else {

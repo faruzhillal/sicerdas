@@ -9,7 +9,9 @@ import {
   ChevronRight,
   UserCircle,
   FileText,
-  Calculator
+  Calculator,
+  Zap,
+  School
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../lib/utils';
@@ -37,24 +39,26 @@ export default function Sidebar() {
       links: [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { name: 'Data Siswa', icon: Users, path: '/dashboard/students' },
+        { name: 'Kelola Kelas', icon: School, path: '/dashboard/classes' },
       ]
     },
     {
-      title: 'SPK SAW (Seleksi)',
+      title: 'SPK Monitoring Umum',
       links: [
         { name: '1. Kriteria', icon: Settings, path: '/dashboard/criteria' },
         { name: '2. Input Nilai', icon: Trophy, path: '/dashboard/scores' },
         { name: '3. Proses SAW', icon: Calculator, path: '/dashboard/saw' },
       ]
     },
-    {
-      title: 'Beasiswa & Hasil',
-      links: [
-        { name: 'Kelola Beasiswa', icon: GraduationCap, path: '/dashboard/scholarships' },
-        { name: 'Daftar Pengajuan', icon: FileText, path: '/dashboard/applications' },
-        { name: 'Penerima Lolos', icon: GraduationCap, path: '/dashboard/awarded' },
-      ]
-    },
+     {
+       title: 'Beasiswa & Hasil',
+       links: [
+         { name: '1. Kelola Beasiswa', icon: GraduationCap, path: '/dashboard/scholarships' },
+         { name: '2. Daftar Pengajuan', icon: FileText, path: '/dashboard/applications' },
+         { name: '3. Seleksi SAW', icon: Zap, path: '/dashboard/scholarship-saw' },
+         { name: '4. Penerima Lolos', icon: GraduationCap, path: '/dashboard/awarded' },
+       ]
+     },
     {
       title: 'Sistem',
       links: [

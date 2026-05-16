@@ -14,6 +14,8 @@ import ComplaintManager from '../components/dashboard/admin/ComplaintManager';
 import StudentManager from '../components/dashboard/admin/StudentManager';
 import AccountManager from '../components/dashboard/admin/AccountManager';
 import CriteriaSettings from '../components/dashboard/admin/CriteriaSettings';
+import ScholarshipSAW from '../components/dashboard/admin/ScholarshipSAW';
+import ClassManager from '../components/dashboard/admin/ClassManager';
 import { LogOut, Bell } from 'lucide-react';
 import { auth } from '../lib/firebase';
 
@@ -34,12 +36,14 @@ export default function DashboardPage() {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/dashboard/scores') return 'Input Nilai SPK';
-    if (path === '/dashboard/saw') return 'Proses SAW';
+    if (path === '/dashboard/saw') return 'SPK Monitoring Umum';
+    if (path === '/dashboard/scholarship-saw') return 'Seleksi SAW Beasiswa';
     if (path === '/dashboard/scholarships') return 'Kelola Beasiswa';
     if (path === '/dashboard/applications') return 'Pengajuan Masuk';
     if (path === '/dashboard/awarded') return 'Penerima Beasiswa';
     if (path === '/dashboard/complaints') return 'Daftar Aduan';
     if (path === '/dashboard/students') return 'Data Master Siswa';
+    if (path === '/dashboard/classes') return 'Kelola Kelas';
     if (path === '/dashboard/accounts') return 'Pengelola Akun';
     if (path === '/dashboard/criteria') return 'Kriteria Penilaian';
     return 'Dashboard Overview';
@@ -83,11 +87,13 @@ export default function DashboardPage() {
                 <Route path="/" element={<AdminDashboard />} />
                 <Route path="/scores" element={<ScoreInput />} />
                 <Route path="/saw" element={<SAWExecution />} />
+                <Route path="/scholarship-saw" element={<ScholarshipSAW />} />
                 <Route path="/scholarships" element={<ScholarshipManager />} />
                 <Route path="/applications" element={<ApplicationManager />} />
                 <Route path="/awarded" element={<AwardedStudentsManager />} />
                 <Route path="/complaints" element={<ComplaintManager />} />
                 <Route path="/students" element={<StudentManager />} />
+                <Route path="/classes" element={<ClassManager />} />
                 <Route path="/accounts" element={<AccountManager />} />
                 <Route path="/criteria" element={<CriteriaSettings />} />
               </Routes>

@@ -62,13 +62,25 @@ service cloud.firestore {
     match /complaints/{complaintId} {
       allow read: if isAdmin() || (isSignedIn() && resource.data.studentId == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.studentId == request.auth.uid;
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (isSignedIn() && resource.data.studentId == request.auth.uid);
+      allow delete: if isAdmin();
       allow list: if isAdmin() || (isSignedIn() && resource.data.studentId == request.auth.uid);
+
+      match /messages/{messageId} {
+        allow read: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/complaints/$(complaintId)).data.studentId == request.auth.uid);
+        allow create: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/complaints/$(complaintId)).data.studentId == request.auth.uid);
+      }
     }
 
     // 7. Criteria
     match /criteria/{criterionId} {
       allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 8. Classes
+    match /classes/{classId} {
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
     
