@@ -53,7 +53,9 @@ service cloud.firestore {
 
     // 5. Scholarship Applications
     match /scholarship_applications/{appId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.studentId == request.auth.uid);
+      allow read: if isAdmin() || 
+                    (isSignedIn() && (resource.data.studentId == request.auth.uid)) ||
+                    (resource.data.status == 'approved');
       allow create: if isSignedIn() && request.resource.data.studentId == request.auth.uid;
       allow update, delete: if isAdmin();
     }

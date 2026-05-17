@@ -162,9 +162,9 @@ export default function MyComplaints() {
                 </div>
                 <div className={cn(
                   "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest",
-                  c.status === 'new' ? "bg-rose-50 text-rose-600" : 
-                  c.status === 'in_progress' ? "bg-amber-50 text-amber-600" :
-                  "bg-emerald-50 text-emerald-600"
+                  c.status === 'new' ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : 
+                  c.status === 'in_progress' ? "bg-emerald-100/50 text-emerald-700" :
+                  "bg-slate-100 text-slate-500"
                 )}>
                   {c.status === 'new' ? 'Baru' : c.status === 'in_progress' ? 'Diproses' : 'Selesai'}
                 </div>

@@ -129,7 +129,7 @@ export default function ComplaintsPage() {
               <button
                 type="submit"
                 disabled={loading || !message.trim()}
-                className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-emerald-600 hover:-translate-y-1 transition-all shadow-xl shadow-slate-200 disabled:opacity-50 disabled:pointer-events-none group"
+                className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-emerald-700 hover:-translate-y-1 transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 disabled:pointer-events-none group"
               >
                 {loading ? (
                   <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -77,9 +77,9 @@ export default function RankingPage() {
   return (
     <div className="py-20 px-4 max-w-7xl mx-auto">
       <div className="max-w-3xl mb-16">
-        <h1 className="text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-6">Papan Peringkat Siswa</h1>
+        <h1 className="text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-6">Papan <span className="text-emerald-500">Peringkat Siswa</span></h1>
         <p className="text-lg text-slate-600">
-          Daftar 50 siswa terbaik berdasarkan akumulasi nilai akademik, keaktifan, dan prestasi ekstrakurikuler.
+          Daftar 50 siswa terbaik berdasarkan akumulasi nilai akademik, keaktifan, dan prestasi ekstrakurikuler SD SDQ AL MAHMUDAH.
         </p>
       </div>
 

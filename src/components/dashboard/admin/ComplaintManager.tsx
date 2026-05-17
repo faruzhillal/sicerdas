@@ -189,9 +189,9 @@ export default function ComplaintManager() {
                   <td className="px-8 py-5">
                     <div className={cn(
                       "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex w-fit items-center gap-1.5",
-                      c.status === 'new' ? "bg-rose-50 text-rose-600" : 
-                      c.status === 'in_progress' ? "bg-amber-50 text-amber-600" :
-                      "bg-emerald-50 text-emerald-600"
+                      c.status === 'new' ? "bg-emerald-600 text-white shadow-sm" : 
+                      c.status === 'in_progress' ? "bg-emerald-100 text-emerald-700" :
+                      "bg-slate-100 text-slate-500"
                     )}>
                       {c.status === 'new' ? (
                         <><Clock size={12} /> Baru</>

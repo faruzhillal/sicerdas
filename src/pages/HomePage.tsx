@@ -133,7 +133,7 @@ export default function HomePage() {
                 title: 'Sistem Pemeringkatan',
                 desc: 'Lihat peringkat siswa di setiap kelas secara transparan berdasarkan poin prestasi akademik dan non-akademik.',
                 icon: Trophy,
-                color: 'bg-yellow-500'
+                color: 'bg-emerald-600'
               },
               {
                 title: 'Portal Beasiswa',

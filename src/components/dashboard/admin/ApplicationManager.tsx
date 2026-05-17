@@ -168,8 +168,8 @@ export default function ApplicationManager() {
                 <div className="flex flex-col items-end gap-1">
                   <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest ${
                     app.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : 
-                    app.status === 'rejected' ? 'bg-rose-50 text-rose-600' : 
-                    'bg-amber-50 text-amber-600'
+                    app.status === 'rejected' ? 'bg-slate-100 text-slate-500' : 
+                    'bg-emerald-600 text-white shadow-sm'
                   }`}>
                     {app.status === 'pending' ? 'Menunggu' : app.status === 'approved' ? 'Disetujui' : 'Ditolak'}
                   </div>
@@ -214,8 +214,8 @@ export default function ApplicationManager() {
                     <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Status</p>
                     <p className={`text-xs font-bold uppercase tracking-widest ${
                       selectedApp.status === 'approved' ? 'text-emerald-400' : 
-                      selectedApp.status === 'rejected' ? 'text-rose-400' : 
-                      'text-amber-400'
+                      selectedApp.status === 'rejected' ? 'text-slate-400' : 
+                      'text-emerald-500'
                     }`}>
                       {selectedApp.status === 'pending' ? 'Menunggu' : selectedApp.status === 'approved' ? 'Disetujui' : 'Ditolak'}
                     </p>
