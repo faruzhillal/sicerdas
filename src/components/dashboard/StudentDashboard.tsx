@@ -101,7 +101,7 @@ export default function StudentDashboard() {
 
   if (loading) return (
     <div className="h-[60vh] flex items-center justify-center">
-      <Loader2 className="animate-spin text-indigo-600" size={32} />
+      <Loader2 className="animate-spin text-emerald-600" size={32} />
     </div>
   );
 
@@ -120,13 +120,13 @@ export default function StudentDashboard() {
           label="Rata-rata Nilai" 
           value={stats.avgScore} 
           icon={Clock} 
-          color="indigo"
+          color="emerald"
         />
         <StatCard 
           label="Status Beasiswa" 
           value={stats.scholarshipStatus} 
           icon={GraduationCap} 
-          color="green"
+          color="emerald"
         />
       </div>
 
@@ -136,7 +136,7 @@ export default function StudentDashboard() {
           <section>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Perkembangan Terakhir</h2>
-              <button className="text-sm font-bold text-indigo-600 hover:underline">Lihat Semua</button>
+              <button className="text-sm font-bold text-emerald-600 hover:underline">Lihat Semua</button>
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-100 divide-y divide-slate-50 overflow-hidden shadow-sm">
               {activities.map((item, i) => (
@@ -151,7 +151,7 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-widest">
+                    <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest">
                       {item.status}
                     </span>
                   </div>
@@ -161,14 +161,14 @@ export default function StudentDashboard() {
           </section>
 
           <section>
-            <div className="relative rounded-[2.5rem] bg-slate-900 p-8 sm:p-12 text-white overflow-hidden">
-               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/30 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
+            <div className="relative rounded-[2.5rem] bg-slate-900 p-8 sm:p-12 text-white overflow-hidden shadow-2xl">
+               <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-600/30 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
                <div className="relative z-10">
-                 <h3 className="text-2xl font-extrabold mb-4">Ayo Kejar Prestasimu!</h3>
-                 <p className="text-slate-400 mb-8 max-w-md leading-relaxed">
+                 <h3 className="text-2xl font-extrabold mb-4 tracking-tight">Ayo Kejar Prestasimu!</h3>
+                 <p className="text-slate-400 mb-8 max-w-md leading-relaxed font-medium">
                    Dapatkan poin lebih banyak dengan mengikuti kegiatan ekstrakurikuler dan lomba akademik tingkat daerah.
                  </p>
-                 <button className="px-6 py-3 bg-white text-slate-900 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-50 transition-all">
+                 <button className="px-8 py-3 bg-white text-slate-900 rounded-xl font-black flex items-center gap-2 hover:bg-emerald-50 transition-all shadow-xl">
                    Info Lomba <ArrowRight size={18} />
                  </button>
                </div>
@@ -199,12 +199,12 @@ export default function StudentDashboard() {
             </button>
           </section>
 
-          <div className="bg-indigo-50 p-6 rounded-[2rem] border border-indigo-100">
-             <h4 className="font-bold text-indigo-900 mb-2 flex items-center gap-2">
+          <div className="bg-emerald-50 p-6 rounded-[2rem] border border-emerald-100">
+             <h4 className="font-bold text-emerald-900 mb-2 flex items-center gap-2">
                <GraduationCap size={18} />
                Tips Beasiswa
              </h4>
-             <p className="text-xs text-indigo-700 leading-relaxed">
+             <p className="text-xs text-emerald-700 leading-relaxed font-medium">
                Pastikan sertifikat prestasi sudah diunggah ke portal sebelum batas akhir pendaftaran beasiswa ditutup.
              </p>
           </div>

@@ -43,21 +43,24 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 animate-in fade-in duration-700 pb-12">
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard label="Total Siswa" value={counts.students} icon={Users} color="indigo" />
-        <StatCard label="Pendaftar Beasiswa" value={counts.applications} icon={CheckCircle} color="green" />
-        <StatCard label="Aduan Masuk" value={counts.complaints} icon={Clock} color="red" />
-        <StatCard label="Program Aktif" value={counts.scholarships} icon={BarChart3} color="amber" />
+        <StatCard label="Total Siswa" value={counts.students} icon={Users} color="emerald" />
+        <StatCard label="Pendaftar Beasiswa" value={counts.applications} icon={CheckCircle} color="emerald" />
+        <StatCard label="Aduan Masuk" value={counts.complaints} icon={Clock} color="emerald" />
+        <StatCard label="Program Aktif" value={counts.scholarships} icon={BarChart3} color="emerald" />
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-10">
         <section className="lg:col-span-2">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Daftar Aduan Terkini</h2>
+          <div className="flex justify-between items-center mb-6">
+             <div>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none mb-1">Aduan Terkini</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Laporan terbaru dari siswa</p>
+             </div>
             <Link 
               to="/dashboard/complaints"
-              className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100"
+              className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-slate-100"
             >
               Lihat Semua
             </Link>
@@ -89,13 +92,13 @@ export default function AdminDashboard() {
                     <td className="px-8 py-5">
                        <span className={cn(
                          "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
-                         item.status === 'new' ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"
+                         item.status === 'new' ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"
                        )}>
                          {item.status === 'new' ? 'Baru' : 'Selesai'}
                        </span>
                     </td>
                     <td className="px-8 py-5">
-                      <button className="text-indigo-600 hover:text-indigo-900 font-bold text-xs uppercase tracking-widest">Detail</button>
+                      <button className="text-emerald-600 hover:text-emerald-900 font-bold text-xs uppercase tracking-widest">Detail</button>
                     </td>
                   </tr>
                 ))}
@@ -106,11 +109,11 @@ export default function AdminDashboard() {
 
         <section className="space-y-8">
            <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/20 blur-3xl rounded-full translate-x-1/4 -translate-y-1/4" />
+               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-600/20 blur-3xl rounded-full translate-x-1/4 -translate-y-1/4" />
                <h3 className="text-xl font-bold mb-6">Quick Actions</h3>
                <div className="space-y-3">
                  {[
-                   { label: 'Update Data Peringkat', icon: Plus, color: 'bg-indigo-600', path: '/dashboard/scores' },
+                   { label: 'Update Data Peringkat', icon: Plus, color: 'bg-emerald-600', path: '/dashboard/scores' },
                    { label: 'Tambah Beasiswa', icon: FileText, color: 'bg-green-600', path: '/dashboard/scholarships' },
                    { label: 'Laporan Bulanan', icon: BarChart3, color: 'bg-slate-700', path: '/dashboard' },
                    { label: 'Pengaturan Sistem', icon: Settings, color: 'bg-slate-700', path: '/dashboard' },
@@ -133,11 +136,11 @@ export default function AdminDashboard() {
              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-[0.2em] mb-6">Kapasitas Penyimpanan</h3>
              <div className="space-y-4">
                 <div className="flex justify-between items-end mb-1">
-                  <span className="text-xs font-bold text-slate-400">Database Quota</span>
-                  <span className="text-xs font-bold text-slate-900">42%</span>
+                   <span className="text-xs font-bold text-slate-400">Database Quota</span>
+                   <span className="text-xs font-bold text-slate-900">42%</span>
                 </div>
                 <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-600 rounded-full w-[42%]" />
+                   <div className="h-full bg-emerald-600 rounded-full w-[42%]" />
                 </div>
                 <p className="text-[10px] text-slate-500 italic">Sistem berjalan dengan optimal di server AI Studio.</p>
              </div>

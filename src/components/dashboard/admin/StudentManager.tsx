@@ -100,11 +100,11 @@ export default function StudentManager() {
   );
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">Data Master Siswa</h1>
-          <p className="text-slate-500">Kelola informasi profil, kelas, dan status akademik seluruh siswa.</p>
+          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1">Manajemen Pengguna</p>
+           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Data Master Siswa</h1>
         </div>
         <button 
           onClick={() => {
@@ -112,9 +112,9 @@ export default function StudentManager() {
             setFormData({ fullName: '', studentId: '', email: '', class: classes[0] || '', role: 'student' });
             setShowForm(true);
           }}
-          className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100"
+          className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
         >
-          <UserPlus size={20} />
+          <UserPlus size={18} />
           Tambah Siswa
         </button>
       </div>
@@ -136,7 +136,7 @@ export default function StudentManager() {
                   type="text" 
                   value={formData.fullName}
                   onChange={e => setFormData({ ...formData, fullName: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -147,7 +147,7 @@ export default function StudentManager() {
                     type="text" 
                     value={formData.studentId}
                     onChange={e => setFormData({ ...formData, studentId: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -155,7 +155,7 @@ export default function StudentManager() {
                   <select 
                     value={formData.class}
                     onChange={e => setFormData({ ...formData, class: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     {classes.length > 0 ? (
                       classes.map(c => <option key={c} value={c}>{c}</option>)
@@ -172,13 +172,13 @@ export default function StudentManager() {
                   type="email" 
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <button 
                 type="submit" 
                 disabled={saving || classes.length === 0}
-                className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-slate-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold hover:bg-slate-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 size={18} className="animate-spin" />}
                 {editingId ? 'Simpan Perubahan' : 'Tambah Siswa'}
@@ -189,16 +189,16 @@ export default function StudentManager() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden text-sm">
-        <div className="p-6 border-b border-slate-100 flex flex-wrap gap-4 justify-between items-center bg-slate-50/50">
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl overflow-hidden text-sm">
+        <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 justify-between items-center bg-slate-50/30">
           <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
               placeholder="Cari siswa berdasarkan nama, NIS, atau email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+              className="w-full pl-12 pr-4 py-3 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm font-bold text-sm"
             />
           </div>
         </div>
@@ -253,7 +253,7 @@ export default function StudentManager() {
                           });
                           setShowForm(true);
                         }}
-                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-lg transition-all"
+                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-white rounded-lg transition-all"
                       >
                         <Edit2 size={16} />
                       </button>

@@ -172,6 +172,8 @@ export default function LoginPage() {
       return; // Silent return to avoid showing scary error messages for user-initiated cancellation
     } else if (err.code === 'auth/popup-blocked') {
       setError('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
+    } else if (err.code === 'auth/unauthorized-domain') {
+      setError('⚠️ KONFIGURASI DIBUTUHKAN: Domain ini belum diizinkan oleh Firebase. Silakan buka Firebase Console > Authentication > Settings > Authorized domains dan tambahkan domain yang Anda gunakan (misal: localhost).');
     } else {
       setError(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
     }
@@ -180,15 +182,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-slate-50 relative overflow-hidden">
       {/* Decorative blobs */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-100/50 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-100/50 blur-[120px] rounded-full pointer-events-none" />
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-8 sm:p-10 relative z-10 border border-slate-200"
+        className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-8 sm:p-10 relative z-10 border border-slate-200"
       >
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-indigo-100">
+          <div className="w-16 h-16 bg-emerald-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-emerald-100">
             {mode === 'login' ? <LogIn size={32} /> : mode === 'register' ? <UserPlus size={32} /> : <KeyRound size={32} />}
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">
@@ -211,13 +213,13 @@ export default function LoginPage() {
           </div>
         )}
 
-        {mode !== 'forgot' && (
+        {mode === 'login' && (
           <div className="flex p-1 bg-slate-100 rounded-xl mb-8">
             <button
               onClick={() => setRole('student')}
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-black transition-all",
-                role === 'student' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                role === 'student' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
               )}
             >
               <User size={14} />
@@ -227,7 +229,7 @@ export default function LoginPage() {
               onClick={() => setRole('admin')}
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-black transition-all",
-                role === 'admin' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                role === 'admin' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
               )}
             >
               <ShieldAlert size={14} />
@@ -251,7 +253,7 @@ export default function LoginPage() {
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="Nama lengkap"
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                       />
                     </div>
                   </div>
@@ -264,7 +266,7 @@ export default function LoginPage() {
                         value={classRoom}
                         onChange={(e) => setClassRoom(e.target.value)}
                         placeholder="Contoh: 1A"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                       />
                     </div>
                     <div className="space-y-1">
@@ -275,7 +277,7 @@ export default function LoginPage() {
                         value={studentId}
                         onChange={(e) => setStudentId(e.target.value)}
                         placeholder="Nomor Induk"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                       />
                     </div>
                   </div>
@@ -286,7 +288,7 @@ export default function LoginPage() {
                       value={nisn}
                       onChange={(e) => setNisn(e.target.value)}
                       placeholder="Nomor Induk Siswa Nasional"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                     />
                   </div>
                   <button 
@@ -308,7 +310,7 @@ export default function LoginPage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="0812xxx"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                     />
                   </div>
                   <div className="space-y-1">
@@ -318,7 +320,7 @@ export default function LoginPage() {
                       value={parentName}
                       onChange={(e) => setParentName(e.target.value)}
                       placeholder="Nama ayah/ibu"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                     />
                   </div>
                   <div className="space-y-1">
@@ -328,7 +330,7 @@ export default function LoginPage() {
                       value={parentJob}
                       onChange={(e) => setParentJob(e.target.value)}
                       placeholder="PNS, Buruh, dsb."
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                     />
                   </div>
                   <div className="space-y-1">
@@ -338,7 +340,7 @@ export default function LoginPage() {
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="Alamat domisili..."
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all resize-none"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all resize-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -346,7 +348,7 @@ export default function LoginPage() {
                     <select 
                       value={parentIncome}
                       onChange={(e) => setParentIncome(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all bg-white"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all bg-white"
                     >
                       <option value="">Pilih Range</option>
                       <option value="< Rp 1.000.000">{'< Rp 1.000.000'}</option>
@@ -378,7 +380,7 @@ export default function LoginPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="email@sekolah.sch.id"
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                       />
                     </div>
                   </div>
@@ -392,14 +394,14 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Minta password minimal 6 karakter"
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                       />
                     </div>
                   </div>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-sm shadow-xl shadow-indigo-100 hover:bg-slate-900 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none mt-4"
+                    className="w-full py-4 bg-emerald-600 text-white rounded-xl font-black text-sm shadow-xl shadow-emerald-100 hover:bg-slate-900 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none mt-4"
                   >
                     {loading ? (
                       <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto" />
@@ -425,7 +427,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@sekolah.sch.id"
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                   />
                 </div>
               </div>
@@ -437,7 +439,7 @@ export default function LoginPage() {
                       <button 
                         type="button"
                         onClick={() => setMode('forgot')}
-                        className="text-[9px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest"
+                        className="text-[9px] font-black text-emerald-600 hover:text-emerald-800 uppercase tracking-widest"
                       >
                         Lupa Password?
                       </button>
@@ -451,7 +453,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Masukkan password"
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                     />
                   </div>
                 </div>
@@ -459,7 +461,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-sm shadow-xl shadow-indigo-100 hover:bg-slate-900 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none mt-4"
+                className="w-full py-4 bg-emerald-600 text-white rounded-xl font-black text-sm shadow-xl shadow-emerald-100 hover:bg-slate-900 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none mt-4"
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto" />
@@ -489,9 +491,9 @@ export default function LoginPage() {
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full py-3.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm flex items-center justify-center gap-3 hover:border-indigo-400 hover:bg-slate-50 active:scale-[0.98] transition-all disabled:opacity-50"
+          className="w-full py-3.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm flex items-center justify-center gap-3 hover:border-emerald-400 hover:bg-slate-50 active:scale-[0.98] transition-all disabled:opacity-50"
         >
-          <Chrome size={18} className="text-indigo-600" />
+          <Chrome size={18} className="text-emerald-600" />
           Lanjutkan dengan Google
         </button>
 
@@ -500,10 +502,12 @@ export default function LoginPage() {
             disabled={loading}
             type="button"
             onClick={() => {
-              setMode(mode === 'login' ? 'register' : 'login');
+              const nextMode = mode === 'login' ? 'register' : 'login';
+              setMode(nextMode);
+              if (nextMode === 'register') setRole('student');
               setRegStep(1);
             }}
-            className="text-xs font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-widest"
+            className="text-xs font-black text-emerald-600 hover:text-emerald-700 transition-colors uppercase tracking-widest"
           >
             {mode === 'login' ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Masuk'}
           </button>

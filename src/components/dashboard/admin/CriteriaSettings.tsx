@@ -85,18 +85,18 @@ export default function CriteriaSettings() {
             setFormData({ name: '', weight: 0, type: 'benefit', description: '' });
             setShowForm(true);
           }}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-indigo-700 transition-colors"
+          className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-emerald-700 transition-colors"
         >
           <Plus size={18} />
           Tambah Kriteria
         </button>
       </div>
 
-      <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex items-start gap-3">
-        <Info className="text-indigo-600 shrink-0 mt-0.5" size={18} />
+      <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-start gap-3">
+        <Info className="text-emerald-600 shrink-0 mt-0.5" size={18} />
         <div>
-          <p className="text-sm text-indigo-900 font-medium tracking-tight">Total Bobot Saat Ini: <span className={totalWeight === 1 ? "text-emerald-600" : "text-rose-600"}>{(totalWeight * 100).toFixed(0)}%</span></p>
-          <p className="text-xs text-indigo-700 mt-1">Idealnya total bobot seluruh kriteria harus berjumlah 100% (1.0) untuk hasil perhitungan yang akurat.</p>
+          <p className="text-sm text-emerald-900 font-medium tracking-tight">Total Bobot Saat Ini: <span className={totalWeight === 1 ? "text-emerald-600" : "text-rose-600"}>{(totalWeight * 100).toFixed(0)}%</span></p>
+          <p className="text-xs text-emerald-700 mt-1">Idealnya total bobot seluruh kriteria harus berjumlah 100% (1.0) untuk hasil perhitungan yang akurat.</p>
         </div>
       </div>
 
@@ -112,7 +112,7 @@ export default function CriteriaSettings() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Contoh: Hafalan Quran"
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -126,7 +126,7 @@ export default function CriteriaSettings() {
                 value={formData.weight}
                 onChange={(e) => setFormData({ ...formData, weight: parseFloat(e.target.value) || 0 })}
                 placeholder="Contoh: 0.3"
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -135,7 +135,7 @@ export default function CriteriaSettings() {
                 required
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as 'benefit'|'cost' })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
               >
                 <option value="benefit">Benefit (Makin Besar Makin Baik)</option>
                 <option value="cost">Cost (Makin Kecil Makin Baik)</option>
@@ -148,7 +148,7 @@ export default function CriteriaSettings() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Deskripsi singkat..."
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
               />
             </div>
             <div className="md:col-span-3 flex justify-end gap-3 pt-2">
@@ -162,7 +162,7 @@ export default function CriteriaSettings() {
               </button>
               <button 
                 type="submit"
-                className="px-6 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-2"
+                className="px-6 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2"
                 disabled={saving}
               >
                 {saving && <Loader2 size={16} className="animate-spin" />}
@@ -179,9 +179,9 @@ export default function CriteriaSettings() {
         ) : criteria.length === 0 ? (
           <div className="col-span-full h-32 flex items-center justify-center text-slate-400 italic">Belum ada kriteria yang dikonfigurasi.</div>
         ) : criteria.map((c) => (
-          <div key={c.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm group hover:border-indigo-200 transition-all">
+          <div key={c.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm group hover:border-emerald-200 transition-all">
             <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
                 <Settings size={20} />
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -191,7 +191,7 @@ export default function CriteriaSettings() {
                     setFormData({ name: c.name, weight: c.weight, type: c.type, description: c.description });
                     setShowForm(true);
                   }}
-                  className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
                 >
                   <Plus size={16} className="rotate-45" /> {/* Use Plus as Edit icon for simplicity or import more */}
                 </button>
@@ -204,11 +204,11 @@ export default function CriteriaSettings() {
               </div>
             </div>
             <h3 className="font-bold text-slate-900 mb-1">{c.name}</h3>
-            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">{c.type}</p>
+            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">{c.type}</p>
             <p className="text-xs text-slate-400 mb-4">{c.description || 'Tidak ada deskripsi'}</p>
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Weight Bobot</span>
-              <span className="text-xl font-black text-indigo-600">{(c.weight * 100).toFixed(0)}%</span>
+              <span className="text-xl font-black text-emerald-600">{(c.weight * 100).toFixed(0)}%</span>
             </div>
           </div>
         ))}

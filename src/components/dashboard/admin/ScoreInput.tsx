@@ -143,40 +143,42 @@ export default function ScoreInput() {
   });
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">Input Nilai SPK</h1>
-        <p className="text-slate-500">Gunakan formulir ini untuk memperbarui nilai kriteria siswa untuk perhitungan SPK.</p>
+    <div className="space-y-8 animate-in fade-in duration-700 pb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+         <div>
+            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1">Entry Nilai Siswa</p>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Perhitungan Kriteria SPK</h1>
+         </div>
+         <button 
+           onClick={() => alert('Fitur Import Excel akan segera hadir!')}
+           className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
+         >
+           <Plus size={18} />
+           Input Massal
+         </button>
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-wrap gap-4 justify-between items-center bg-slate-50/50">
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl overflow-hidden">
+        <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 justify-between items-center bg-slate-50/30">
           <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
               placeholder="Cari siswa berdasarkan nama atau NIS..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
+              className="w-full pl-12 pr-4 py-3 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm font-bold text-sm"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <select 
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-6 py-3 border border-slate-100 rounded-2xl text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
             >
               <option>Semua Kelas</option>
               {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-            <button 
-              onClick={() => alert('Fitur Import Excel akan segera hadir!')}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-slate-900 transition-colors"
-            >
-              <Plus size={18} />
-              Input Massal
-            </button>
           </div>
         </div>
 
@@ -214,7 +216,7 @@ export default function ScoreInput() {
                         type="number" 
                         value={student.scores[c.id] || 0}
                         onChange={(e) => handleScoreChange(student.id, c.id, e.target.value)}
-                        className="w-16 h-10 text-center border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                        className="w-16 h-10 text-center border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                       />
                     </td>
                   ))}
@@ -223,7 +225,7 @@ export default function ScoreInput() {
                       <button 
                         onClick={() => saveScore(student)}
                         disabled={savingId === student.id}
-                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-50" 
+                        className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50" 
                         title="Simpan"
                       >
                         {savingId === student.id ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}

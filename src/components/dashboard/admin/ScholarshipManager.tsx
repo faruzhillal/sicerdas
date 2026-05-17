@@ -82,11 +82,11 @@ export default function ScholarshipManager() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">Kelola Beasiswa</h1>
-          <p className="text-slate-500">Kelola daftar program beasiswa yang aktif di sekolah.</p>
+          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1">Manajemen Program</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Beasiswa Sekolah</h1>
         </div>
         <button 
           onClick={() => {
@@ -94,9 +94,9 @@ export default function ScholarshipManager() {
             setFormData({ name: '', description: '', status: 'open', deadline: '', benefits: [] });
             setShowForm(true);
           }}
-          className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100"
+          className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
         >
-          <Plus size={20} />
+          <Plus size={18} />
           Program Baru
         </button>
       </div>
@@ -118,7 +118,7 @@ export default function ScholarshipManager() {
                   type="text" 
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
@@ -128,7 +128,7 @@ export default function ScholarshipManager() {
                   rows={3}
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -137,7 +137,7 @@ export default function ScholarshipManager() {
                   <select 
                     value={formData.status}
                     onChange={e => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="open">Dibuka</option>
                     <option value="announced">Diumumkan</option>
@@ -151,14 +151,14 @@ export default function ScholarshipManager() {
                     type="date" 
                     value={formData.deadline}
                     onChange={e => setFormData({ ...formData, deadline: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
               <button 
                 type="submit" 
                 disabled={saving}
-                className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-slate-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold hover:bg-slate-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 size={18} className="animate-spin" />}
                 {editingId ? 'Simpan Perubahan' : 'Publish Program'}
@@ -172,14 +172,14 @@ export default function ScholarshipManager() {
         {loading ? (
           <div className="lg:col-span-3 text-center py-12 text-slate-400">Memuat data...</div>
         ) : scholarships.map((s) => (
-          <div key={s.id} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:border-indigo-400 transition-all">
+          <div key={s.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col hover:border-emerald-400 transition-all">
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
-                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
                   <GraduationCap size={24} />
                 </div>
                 <span className={cn(
-                  "px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest border",
+                  "px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border",
                   s.status === 'open' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : 
                   s.status === 'announced' ? "bg-blue-50 text-blue-600 border-blue-100" :
                   "bg-slate-50 text-slate-500 border-slate-200"
@@ -210,19 +210,19 @@ export default function ScholarshipManager() {
                   });
                   setShowForm(true);
                 }}
-                className="flex items-center justify-center gap-2 flex-1 py-2 text-xs font-bold bg-white border border-slate-200 rounded-md hover:border-indigo-400 transition-colors"
+                className="flex items-center justify-center gap-2 flex-1 py-2.5 text-xs font-bold bg-white border border-slate-200 rounded-xl hover:border-emerald-400 transition-colors"
               >
                 <Edit3 size={14} /> Edit
               </button>
               <button 
                 onClick={() => toggleStatus(s)}
-                className="flex-1 py-2 text-xs font-bold bg-white border border-slate-200 rounded-md hover:bg-slate-100 transition-colors"
+                className="flex-1 py-2.5 text-xs font-bold bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors"
               >
                 {s.status === 'open' ? 'Tutup' : 'Buka'}
               </button>
               <button 
                 onClick={() => deleteScholarship(s.id)}
-                className="p-2 text-slate-400 hover:text-rose-600 transition-colors"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 transition-colors"
               >
                 <Trash2 size={16} />
               </button>

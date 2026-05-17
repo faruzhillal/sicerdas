@@ -6,19 +6,19 @@ interface StatCardProps {
   value: string | number;
   icon: LucideIcon;
   trend?: string;
-  color?: 'indigo' | 'green' | 'amber' | 'red';
+  color?: 'emerald' | 'green' | 'amber' | 'red';
 }
 
-export default function StatCard({ label, value, icon: Icon, trend, color = 'indigo' }: StatCardProps) {
+export default function StatCard({ label, value, icon: Icon, trend, color = 'emerald' }: StatCardProps) {
   const colors = {
-    indigo: 'bg-indigo-50 text-indigo-600',
+    emerald: 'bg-emerald-50 text-emerald-600',
     green: 'bg-green-50 text-green-600',
     amber: 'bg-amber-50 text-amber-600',
     red: 'bg-red-50 text-red-600',
   };
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 hover:border-indigo-100 transition-all group">
+    <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 hover:border-emerald-100 transition-all group">
       <div className="flex justify-between items-start mb-6">
         <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", colors[color])}>
           <Icon size={28} />

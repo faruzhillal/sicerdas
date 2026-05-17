@@ -112,7 +112,7 @@ export default function MyComplaints() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2 uppercase italic">Riwayat <span className="text-indigo-600">Aduan</span></h1>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2 uppercase italic">Riwayat <span className="text-emerald-600">Aduan</span></h1>
           <p className="text-slate-500 text-sm font-medium">Pantau status dan diskusikan laporan Anda secara real-time.</p>
         </div>
       </div>
@@ -137,7 +137,7 @@ export default function MyComplaints() {
                 "p-6 rounded-[2rem] border transition-all cursor-pointer group relative overflow-hidden",
                 selectedComplaint?.id === c.id 
                   ? "bg-slate-900 text-white border-slate-900 shadow-2xl scale-[1.02]" 
-                  : "bg-white border-slate-100 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-50/50"
+                  : "bg-white border-slate-100 hover:border-emerald-100 hover:shadow-xl hover:shadow-emerald-50/50"
               )}
             >
               <div className="flex justify-between items-start mb-6">
@@ -146,7 +146,7 @@ export default function MyComplaints() {
                     "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
                     selectedComplaint?.id === c.id 
                         ? "bg-white/10 text-white" 
-                        : (c.status === 'resolved' ? "bg-emerald-50 text-emerald-600" : "bg-indigo-50 text-indigo-600")
+                        : (c.status === 'resolved' ? "bg-emerald-50 text-emerald-600" : "bg-emerald-50 text-emerald-600")
                   )}>
                     <MessageSquare size={24} />
                   </div>
@@ -187,7 +187,7 @@ export default function MyComplaints() {
                 <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                     <div>
                         <h2 className="text-xl font-black text-slate-900 tracking-tight">{selectedComplaint.category}</h2>
-                        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Ruang Obrolan Aduan</p>
+                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Ruang Obrolan Aduan</p>
                     </div>
                     <button 
                         onClick={() => setSelectedComplaint(null)}
@@ -201,11 +201,11 @@ export default function MyComplaints() {
                 <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-slate-50/20">
                     {/* Initial User Message */}
                     <div className="flex flex-col items-end ml-auto max-w-[85%]">
-                        <div className="p-5 bg-indigo-600 text-white rounded-[2rem] rounded-tr-none shadow-lg shadow-indigo-100">
+                        <div className="p-5 bg-emerald-600 text-white rounded-[2rem] rounded-tr-none shadow-lg shadow-emerald-100">
                              <p className="text-sm font-bold leading-relaxed">
                                  {selectedComplaint.message}
                              </p>
-                             <p className="mt-3 text-[9px] text-indigo-300 font-bold uppercase tracking-widest">
+                             <p className="mt-3 text-[9px] text-emerald-300 font-bold uppercase tracking-widest">
                                 Dikirim pada {new Date(selectedComplaint.submittedAt).toLocaleString('id-ID')}
                             </p>
                         </div>
@@ -214,7 +214,7 @@ export default function MyComplaints() {
                     {/* Messages Thread */}
                     {loadingMessages ? (
                         <div className="flex justify-center p-4">
-                            <Loader2 size={24} className="animate-spin text-indigo-400" />
+                            <Loader2 size={24} className="animate-spin text-emerald-400" />
                         </div>
                     ) : messages.map((msg) => (
                         <div key={msg.id} className={cn(
@@ -236,18 +236,18 @@ export default function MyComplaints() {
                             <div className={cn(
                                 "p-5 rounded-[2rem] shadow-sm transition-all",
                                 msg.senderRole === 'student' 
-                                    ? "bg-indigo-600 text-white rounded-tr-none shadow-indigo-100" 
+                                    ? "bg-emerald-600 text-white rounded-tr-none shadow-emerald-100" 
                                     : "bg-white border border-slate-100 rounded-tl-none shadow-slate-200/50"
                             )}>
                                 <p className={cn(
                                     "text-sm font-bold leading-relaxed",
-                                    msg.senderRole === 'student' ? "text-indigo-50" : "text-slate-700"
+                                    msg.senderRole === 'student' ? "text-emerald-50" : "text-slate-700"
                                 )}>
                                     {msg.message}
                                 </p>
                                 <p className={cn(
                                     "mt-3 text-[9px] font-bold uppercase tracking-widest",
-                                    msg.senderRole === 'student' ? "text-indigo-300" : "text-slate-400"
+                                    msg.senderRole === 'student' ? "text-emerald-300" : "text-slate-400"
                                 )}>
                                     {msg.timestamp?.toDate() ? msg.timestamp.toDate().toLocaleString('id-ID') : 'Baru saja'}
                                 </p>
@@ -270,12 +270,12 @@ export default function MyComplaints() {
                             onChange={(e) => setReply(e.target.value)}
                             placeholder={selectedComplaint.status === 'resolved' ? "Chat ditutup (sudah selesai)" : "Ketik pesan/tanya kembali..."}
                             disabled={saving || selectedComplaint.status === 'resolved'}
-                            className="flex-1 px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm disabled:opacity-50"
+                            className="flex-1 px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-sm disabled:opacity-50"
                         />
                         <button 
                             type="submit"
                             disabled={saving || !reply.trim() || selectedComplaint.status === 'resolved'}
-                            className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center hover:bg-slate-900 transition-all shadow-xl shadow-indigo-200/50 disabled:opacity-50"
+                            className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center hover:bg-slate-900 transition-all shadow-xl shadow-emerald-200/50 disabled:opacity-50"
                         >
                             {saving ? <Loader2 size={24} className="animate-spin" /> : <Send size={24} />}
                         </button>

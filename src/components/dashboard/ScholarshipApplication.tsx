@@ -139,7 +139,7 @@ export default function ScholarshipApplication() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-20">
-        <Loader2 className="animate-spin text-indigo-600" size={32} />
+        <Loader2 className="animate-spin text-emerald-600" size={32} />
       </div>
     );
   }
@@ -156,7 +156,7 @@ export default function ScholarshipApplication() {
         </p>
         <button 
           onClick={() => navigate('/dashboard')}
-          className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-slate-900 transition-all shadow-lg shadow-indigo-100"
+          className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-slate-900 transition-all shadow-lg shadow-emerald-100"
         >
           Kembali ke Dashboard
         </button>
@@ -176,7 +176,7 @@ export default function ScholarshipApplication() {
         </p>
         <button 
           onClick={() => navigate('/dashboard')}
-          className="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all"
+          className="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-emerald-600 transition-all"
         >
           Kembali ke Dashboard
         </button>
@@ -188,22 +188,22 @@ export default function ScholarshipApplication() {
     <div className="max-w-4xl mx-auto py-8 px-6">
       <button 
         onClick={() => navigate('/dashboard')}
-        className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 mb-8 font-medium transition-colors"
+        className="flex items-center gap-2 text-slate-500 hover:text-emerald-600 mb-8 font-medium transition-colors"
       >
         <ArrowLeft size={18} /> Kembali
       </button>
 
       <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden mb-12">
-        <div className="bg-indigo-600 p-8 sm:p-10 text-white relative">
+        <div className="bg-emerald-600 p-8 sm:p-10 text-white relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-3xl rounded-full translate-x-1/3 -translate-y-1/3" />
           <div className="relative z-10 flex items-center gap-4 mb-6">
             <div className="p-3 bg-white/20 backdrop-blur-md rounded-xl">
               <GraduationCap size={24} />
             </div>
-            <span className="text-xs font-bold uppercase tracking-widest text-indigo-100">Formulir Pendaftaran Beasiswa</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-100">Formulir Pendaftaran Beasiswa</span>
           </div>
           <h1 className="text-3xl font-extrabold relative z-10 mb-2">I. Formulir Pendaftaran</h1>
-          <p className="text-indigo-100/80 text-sm font-medium relative z-10">
+          <p className="text-emerald-100/80 text-sm font-medium relative z-10">
             Isi semua kolom yang bertanda bintang (*)
           </p>
         </div>
@@ -233,7 +233,7 @@ export default function ScholarshipApplication() {
                   placeholder="Masukkan NISN"
                   value={formData.nisn}
                   onChange={(e) => setFormData({ ...formData, nisn: e.target.value })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                 />
               </div>
               <div className="space-y-2">
@@ -272,7 +272,7 @@ export default function ScholarshipApplication() {
                   placeholder="Nama Lengkap Wali"
                   value={formData.parentName}
                   onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                 />
               </div>
               <div className="space-y-2">
@@ -283,7 +283,7 @@ export default function ScholarshipApplication() {
                   placeholder="Contoh: Wiraswasta, PNS, Buruh"
                   value={formData.parentJob}
                   onChange={(e) => setFormData({ ...formData, parentJob: e.target.value })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                 />
               </div>
               <div className="sm:col-span-2 space-y-2">
@@ -292,7 +292,7 @@ export default function ScholarshipApplication() {
                   required
                   value={formData.parentIncome}
                   onChange={(e) => setFormData({ ...formData, parentIncome: e.target.value })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all bg-white"
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all bg-white"
                 >
                   <option value="">-- Pilih Rentang Penghasilan --</option>
                   {INCOME_RANGES.map(range => (
@@ -325,7 +325,7 @@ export default function ScholarshipApplication() {
                     ...formData, 
                     criteriaValues: { ...formData.criteriaValues, gpa: parseFloat(e.target.value) || 0 } 
                   })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                 />
               </div>
               <div className="space-y-2">
@@ -340,7 +340,7 @@ export default function ScholarshipApplication() {
                     ...formData, 
                     criteriaValues: { ...formData.criteriaValues, dependents: parseInt(e.target.value) || 0 } 
                   })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all"
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                 />
               </div>
               <div className="space-y-2">
@@ -352,7 +352,7 @@ export default function ScholarshipApplication() {
                     ...formData, 
                     criteriaValues: { ...formData.criteriaValues, achievements: parseInt(e.target.value) || 1 } 
                   })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all bg-white"
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all bg-white"
                 >
                   <option value={1}>Cukup (Hanya Akademik)</option>
                   <option value={2}>Baik (Ex-school/Organisasi)</option>
@@ -380,34 +380,34 @@ export default function ScholarshipApplication() {
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="Jelaskan secara singkat mengapa siswa tersebut layak mendapatkan beasiswa ini..."
-                className="w-full px-5 py-4 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50/50 text-sm font-medium transition-all"
+                className="w-full px-5 py-4 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50 text-sm font-medium transition-all"
               />
             </div>
 
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Upload Dokumen Pendukung (PDF/JPG) *</label>
               <p className="text-[10px] text-slate-400 font-medium">Gabungkan rapor, sertifikat, sktm ke dalam 1 file maksimal 5MB</p>
-              <div className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center bg-slate-50 group hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer">
-                <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-indigo-600 mb-4 group-hover:scale-110 transition-transform">
+              <div className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center bg-slate-50 group hover:border-emerald-400 hover:bg-emerald-50/30 transition-all cursor-pointer">
+                <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition-transform">
                   <GraduationCap size={24} />
                 </div>
                 <p className="text-xs font-bold text-slate-600 mb-1">Klik untuk upload atau drag & drop file kesini</p>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest">Max Ukuran file: 5MB</p>
-                <p className="mt-4 text-[10px] bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full font-bold">Berkas Simulasi Otomatis Terdeteksi</p>
+                <p className="mt-4 text-[10px] bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full font-bold">Berkas Simulasi Otomatis Terdeteksi</p>
               </div>
             </div>
           </section>
 
           <div className="pt-8 space-y-6">
-            <label className="flex items-start gap-3 p-4 rounded-xl bg-indigo-50 border border-indigo-100 cursor-pointer group">
+            <label className="flex items-start gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100 cursor-pointer group">
               <input 
                 type="checkbox" 
                 required
                 checked={formData.declaration}
                 onChange={(e) => setFormData({ ...formData, declaration: e.target.checked })}
-                className="mt-1 w-4 h-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
+                className="mt-1 w-4 h-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500"
               />
-              <span className="text-xs text-indigo-900 leading-relaxed font-medium">
+              <span className="text-xs text-emerald-900 leading-relaxed font-medium">
                 Dengan ini saya menyatakan bahwa seluruh data yang diisi adalah benar. Apabila di kemudian hari ditemukan ketidaksesuaian data, pihak sekolah berhak membatalkan status penerima beasiswa.
               </span>
             </label>
@@ -423,7 +423,7 @@ export default function ScholarshipApplication() {
               <button 
                 type="submit"
                 disabled={submitting}
-                className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-900 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50"
+                className="flex-[2] py-4 bg-emerald-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-900 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50"
               >
                 {submitting ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle2 size={20} />}
                 Kirim Pengajuan

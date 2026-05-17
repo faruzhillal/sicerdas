@@ -127,25 +127,30 @@ export default function ComplaintManager() {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2 uppercase italic">Pusat <span className="text-indigo-600">Aduan</span></h1>
-          <p className="text-slate-500 font-medium">Tanggapi secara interaktif laporan atau keluhan yang dikirimkan oleh siswa.</p>
-        </div>
-      </div>
-
+    <div className="space-y-8 animate-in fade-in duration-700 pb-12">
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl overflow-hidden">
-        <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 justify-between items-center bg-slate-50/30">
-          <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Cari aduan atau nama siswa..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm font-bold text-sm"
-            />
+        <div className="p-8 border-b border-slate-50 flex flex-wrap gap-6 justify-between items-center bg-slate-50/30">
+          <div className="flex-1 min-w-[300px]">
+            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-2">Manajemen Laporan</p>
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Cari aduan atau nama siswa..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm font-bold text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+             <div className="text-right">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Laporan</p>
+                <p className="text-xl font-black text-slate-900 leading-none">{complaints.length}</p>
+             </div>
+             <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-lg">
+                <MessageSquare size={18} />
+             </div>
           </div>
         </div>
 
@@ -168,7 +173,7 @@ export default function ComplaintManager() {
               ) : filteredComplaints.map((c) => (
                 <tr key={c.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-8 py-5">
-                    <p className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{c.studentName}</p>
+                    <p className="text-sm font-black text-slate-900 group-hover:text-emerald-600 transition-colors">{c.studentName}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       {new Date(c.submittedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                     </p>
@@ -218,13 +223,13 @@ export default function ComplaintManager() {
             {/* Chat Header */}
             <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg">
                   <UserIcon size={24} />
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900 tracking-tight">{selectedComplaint.studentName}</h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{selectedComplaint.category}</span>
+                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{selectedComplaint.category}</span>
                     <div className="w-1 h-1 rounded-full bg-slate-300"></div>
                     <span className="text-[10px] font-bold text-slate-400 italic">Chat Interaktif</span>
                   </div>
@@ -258,7 +263,7 @@ export default function ComplaintManager() {
                 {/* Subcollection Messages */}
                 {loadingMessages ? (
                   <div className="flex justify-center p-4">
-                    <Loader2 size={24} className="animate-spin text-indigo-400" />
+                    <Loader2 size={24} className="animate-spin text-emerald-400" />
                   </div>
                 ) : messages.map((msg) => (
                     <div key={msg.id} className={cn(
@@ -276,18 +281,18 @@ export default function ComplaintManager() {
                         <div className={cn(
                             "p-5 rounded-[2rem] shadow-sm",
                             msg.senderRole === 'admin' 
-                                ? "bg-indigo-600 text-white rounded-tr-none shadow-indigo-200" 
+                                ? "bg-emerald-600 text-white rounded-tr-none shadow-emerald-200" 
                                 : "bg-white border border-slate-100 rounded-tl-none shadow-slate-200/50"
                         )}>
                             <p className={cn(
                                 "text-sm font-bold leading-relaxed",
-                                msg.senderRole === 'admin' ? "text-indigo-50" : "text-slate-700"
+                                msg.senderRole === 'admin' ? "text-emerald-50" : "text-slate-700"
                             )}>
                                 {msg.message}
                             </p>
                             <p className={cn(
                                 "mt-3 text-[9px] font-bold uppercase tracking-widest",
-                                msg.senderRole === 'admin' ? "text-indigo-300" : "text-slate-400"
+                                msg.senderRole === 'admin' ? "text-emerald-300" : "text-slate-400"
                             )}>
                                 {msg.timestamp?.toDate() ? msg.timestamp.toDate().toLocaleString('id-ID') : 'Baru saja'}
                             </p>
@@ -321,12 +326,12 @@ export default function ComplaintManager() {
                   onChange={(e) => setReply(e.target.value)}
                   placeholder="Ketik balasan Anda..."
                   disabled={selectedComplaint.status === 'resolved'}
-                  className="flex-1 px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm disabled:opacity-50"
+                  className="flex-1 px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-sm disabled:opacity-50"
                 />
                 <button 
                   type="submit"
                   disabled={saving || !reply.trim() || selectedComplaint.status === 'resolved'}
-                  className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center hover:bg-slate-900 transition-all shadow-xl shadow-indigo-100 disabled:opacity-50"
+                  className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center hover:bg-slate-900 transition-all shadow-xl shadow-emerald-100 disabled:opacity-50"
                 >
                   {saving ? <Loader2 size={24} className="animate-spin" /> : <Send size={24} />}
                 </button>

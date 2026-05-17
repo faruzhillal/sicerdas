@@ -44,11 +44,11 @@ export default function ComplaintsPage() {
     <div className="py-20 px-4 max-w-7xl mx-auto min-h-[calc(100vh-64px)] flex items-center justify-center">
       <div className="grid lg:grid-cols-2 gap-16 items-center w-full">
         <div>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-red-100 text-red-600 text-sm font-semibold mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-sm font-semibold mb-6">
             <AlertCircle size={16} />
             Pusat Bantuan & Pengaduan
           </div>
-          <h1 className="text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-8">Kami Melayani <span className="text-red-500">Aduan & Saran</span> Anda</h1>
+          <h1 className="text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-8">Kami Melayani <span className="text-emerald-500">Aduan & Saran</span> Anda</h1>
           <p className="text-lg text-slate-600 leading-relaxed mb-10">
             Punya masalah teknis, kendala akademik, atau saran untuk perbaikan sistem kami? Jangan ragu untuk menyampaikannya. Tim kami akan menindaklanjuti dalam waktu maksimal 2x24 jam kerja.
           </p>
@@ -59,7 +59,7 @@ export default function ComplaintsPage() {
               { icon: Info, title: 'Privasi Terjamin', desc: 'Aduan Anda hanya dapat dilihat oleh tim berwenang.' },
             ].map((item, i) => (
               <div key={i} className="flex gap-4">
-                <div className="w-12 h-12 bg-white rounded-2xl shadow-md flex items-center justify-center text-red-500 border border-slate-50 shrink-0">
+                <div className="w-12 h-12 bg-white rounded-2xl shadow-md flex items-center justify-center text-emerald-500 border border-slate-50 shrink-0">
                   <item.icon size={24} />
                 </div>
                 <div>
@@ -87,7 +87,7 @@ export default function ComplaintsPage() {
               </p>
               <button
                 onClick={() => setSubmitted(false)}
-                className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-100"
+                className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-100"
               >
                 Kirim Aduan Lain
               </button>
@@ -105,7 +105,7 @@ export default function ComplaintsPage() {
                       className={cn(
                         "py-3 rounded-xl text-sm font-bold transition-all border",
                         category === cat
-                          ? "bg-red-50 border-red-200 text-red-600"
+                          ? "bg-emerald-50 border-emerald-200 text-emerald-600"
                           : "bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-300"
                       )}
                     >
@@ -121,7 +121,7 @@ export default function ComplaintsPage() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Ceritakan detail masalah atau saran Anda di sini..."
-                  className="w-full min-h-[160px] p-5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-200 transition-all text-slate-700 resize-none"
+                  className="w-full min-h-[160px] p-5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:border-emerald-200 transition-all text-slate-700 resize-none"
                   required
                 />
               </div>
@@ -129,7 +129,7 @@ export default function ComplaintsPage() {
               <button
                 type="submit"
                 disabled={loading || !message.trim()}
-                className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-red-600 hover:-translate-y-1 transition-all shadow-xl shadow-slate-200 disabled:opacity-50 disabled:pointer-events-none group"
+                className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-emerald-600 hover:-translate-y-1 transition-all shadow-xl shadow-slate-200 disabled:opacity-50 disabled:pointer-events-none group"
               >
                 {loading ? (
                   <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -23,7 +23,7 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform">
+              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform">
                 S
               </div>
               <div className="flex flex-col">
@@ -40,9 +40,9 @@ export default function Navbar() {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2",
+                  "px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
                   location.pathname === item.path
-                    ? "bg-indigo-50 text-indigo-700"
+                    ? "bg-emerald-50 text-emerald-700"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 )}
               >
@@ -56,7 +56,7 @@ export default function Navbar() {
             {currentUser ? (
               <Link
                 to="/dashboard"
-                className="flex items-center gap-3 pl-3 pr-1 py-1 rounded-full bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-all shadow-sm"
+                className="flex items-center gap-3 pl-3 pr-1 py-1 rounded-full bg-slate-50 border border-slate-200 hover:border-emerald-300 transition-all shadow-sm"
               >
                 <div className="text-right hidden sm:block">
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Dashboard</p>
@@ -64,14 +64,14 @@ export default function Navbar() {
                     {profile?.fullName.split(' ')[0] || 'User'}
                   </p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center font-bold text-xs">
+                <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center font-bold text-xs text-slate-600">
                   {profile?.fullName?.charAt(0) || 'U'}
                 </div>
               </Link>
             ) : (
               <Link
                 to="/login"
-                className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-sm"
+                className="bg-emerald-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-sm"
               >
                 <LogIn size={16} />
                 Masuk
@@ -109,7 +109,7 @@ export default function Navbar() {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors",
                     location.pathname === item.path
-                      ? "bg-indigo-50 text-indigo-700"
+                      ? "bg-emerald-50 text-emerald-700"
                       : "text-slate-600 hover:bg-slate-50"
                   )}
                 >
@@ -122,7 +122,7 @@ export default function Navbar() {
                   <Link
                     to="/dashboard"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-50 text-indigo-700 font-medium"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 text-emerald-700 font-medium"
                   >
                     <LayoutDashboard size={18} />
                     Dashboard

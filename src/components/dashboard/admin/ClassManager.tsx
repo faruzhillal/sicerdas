@@ -65,7 +65,7 @@ export default function ClassManager() {
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex justify-between items-center bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-1 uppercase italic">Kelola <span className="text-indigo-600">Kelas</span></h1>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-1 uppercase italic">Kelola <span className="text-emerald-600">Kelas</span></h1>
           <p className="text-slate-500 text-sm font-medium">Tambah atau perbarui daftar kelas di sekolah.</p>
         </div>
         <button 
@@ -74,7 +74,7 @@ export default function ClassManager() {
             setFormData({ name: '', description: '' });
             setShowForm(true);
           }}
-          className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-black flex items-center gap-2 hover:bg-slate-900 transition-all shadow-xl shadow-indigo-100"
+          className="px-6 py-3 bg-emerald-600 text-white rounded-xl text-sm font-black flex items-center gap-2 hover:bg-slate-900 transition-all shadow-xl shadow-emerald-100"
         >
           <Plus size={18} /> Tambah Kelas
         </button>
@@ -98,7 +98,7 @@ export default function ClassManager() {
                   placeholder="Contoh: XII RPL 1"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white font-bold"
+                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white font-bold"
                 />
               </div>
               <div className="space-y-2">
@@ -108,7 +108,7 @@ export default function ClassManager() {
                   placeholder="Contoh: Rekayasa Perangkat Lunak"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white font-bold"
+                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white font-bold"
                 />
               </div>
             </div>
@@ -122,7 +122,7 @@ export default function ClassManager() {
               </button>
               <button 
                 type="submit" 
-                className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-black text-sm hover:bg-indigo-500 transition-all flex items-center gap-2 shadow-xl shadow-indigo-900/20"
+                className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-black text-sm hover:bg-emerald-500 transition-all flex items-center gap-2 shadow-xl shadow-emerald-900/20"
               >
                 <Check size={18} /> Simpan Kelas
               </button>
@@ -144,8 +144,8 @@ export default function ClassManager() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {classes.map((c) => (
             <div key={c.id} className="bg-white border border-slate-100 rounded-[2rem] p-8 hover:shadow-2xl hover:shadow-slate-100 transition-all group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-bl-[4rem] group-hover:bg-indigo-50 transition-colors flex items-center justify-center pl-4 pb-4">
-                <School className="text-slate-200 group-hover:text-indigo-200 transition-colors" size={32} />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-bl-[4rem] group-hover:bg-emerald-50 transition-colors flex items-center justify-center pl-4 pb-4">
+                <School className="text-slate-200 group-hover:text-emerald-200 transition-colors" size={32} />
               </div>
               <div className="relative z-10">
                 <h3 className="text-2xl font-black text-slate-900 mb-2 truncate pr-16">{c.name}</h3>
@@ -159,7 +159,7 @@ export default function ClassManager() {
                       setShowForm(true);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    className="p-3 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                    className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                   >
                     <Edit3 size={18} />
                   </button>

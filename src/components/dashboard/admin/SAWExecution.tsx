@@ -155,23 +155,23 @@ export default function SAWExecution() {
 
   if (loading) return (
     <div className="h-[60vh] flex items-center justify-center">
-      <Loader2 className="animate-spin text-indigo-600" size={32} />
+      <Loader2 className="animate-spin text-emerald-600" size={32} />
     </div>
   );
 
   return (
-    <div className="space-y-10 pb-20 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">SPK SAW Projector</h1>
-          <p className="text-slate-500 font-medium">Lakukan perhitungan Simple Additive Weighting secara presisi.</p>
+          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1">Engine Perhitungan</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Kalkulasi SAW Monitoring</h1>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
           {step === 1 ? (
             <button 
               onClick={executeSAW}
               disabled={students.length === 0 || criteria.length === 0}
-              className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black flex items-center gap-3 hover:bg-slate-900 transition-all shadow-xl shadow-indigo-100 disabled:opacity-50"
+              className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center gap-3 hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200 disabled:opacity-50"
             >
               {calculating ? <Loader2 size={20} className="animate-spin" /> : <Calculator size={20} />}
               Hitung Sekarang
@@ -182,7 +182,7 @@ export default function SAWExecution() {
                 onClick={() => setStep(1)}
                 className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black transition-all hover:bg-slate-200"
               >
-                Kembali ke Data
+                Kembali
               </button>
               <button 
                 onClick={publishRankings}
@@ -199,11 +199,11 @@ export default function SAWExecution() {
 
       {/* Stepper */}
       <div className="flex items-center gap-4 bg-white p-4 rounded-full border border-slate-100 w-fit">
-        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 1 ? "bg-indigo-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>01 Matrix Keputusan</div>
+        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 1 ? "bg-emerald-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>01 Matrix Keputusan</div>
         <ArrowRight size={14} className="text-slate-300" />
-        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 2 ? "bg-indigo-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>02 Normalisasi</div>
+        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 2 ? "bg-emerald-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>02 Normalisasi</div>
         <ArrowRight size={14} className="text-slate-300" />
-        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 3 ? "bg-indigo-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>03 Hasil Akhir</div>
+        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 3 ? "bg-emerald-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>03 Hasil Akhir</div>
       </div>
 
       {students.length === 0 ? (
@@ -218,7 +218,7 @@ export default function SAWExecution() {
         /* Matrix Data */
         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl overflow-hidden">
           <div className="p-8 border-b border-slate-50 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <TableIcon size={20} />
             </div>
             <div>
@@ -233,7 +233,7 @@ export default function SAWExecution() {
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Siswa</th>
                   {criteria.map(c => (
                     <th key={c.id} className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                      C: {c.name}<br/><span className="text-[8px] opacity-60 text-indigo-600">({(c.weight * 100).toFixed(0)}%)</span>
+                      C: {c.name}<br/><span className="text-[8px] opacity-60 text-emerald-600">({(c.weight * 100).toFixed(0)}%)</span>
                     </th>
                   ))}
                 </tr>
@@ -259,7 +259,7 @@ export default function SAWExecution() {
       ) : step === 2 ? (
         /* Normalization Matrix */
         <div className="space-y-8">
-           <div className="bg-indigo-600 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+           <div className="bg-emerald-600 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
               <div className="relative z-10 flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
@@ -270,12 +270,12 @@ export default function SAWExecution() {
                 </div>
                 <button 
                   onClick={() => setStep(3)}
-                  className="px-8 py-3 bg-white text-indigo-600 rounded-xl font-black text-sm hover:bg-slate-900 hover:text-white transition-all shadow-lg"
+                  className="px-8 py-3 bg-white text-emerald-600 rounded-xl font-black text-sm hover:bg-slate-900 hover:text-white transition-all shadow-lg"
                 >
                   Lanjut Lihat Ranking
                 </button>
               </div>
-              <p className="text-indigo-100/80 text-sm font-medium leading-relaxed max-w-2xl relative z-10">
+              <p className="text-emerald-100/80 text-sm font-medium leading-relaxed max-w-2xl relative z-10">
                 Sistem menghitung nilai normalisasi berdasarkan tipe kriteria. 
                 <span className="font-black text-white ml-1">Benefit: (Value / Max)</span>, 
                 <span className="font-black text-white ml-1">Cost: (Min / Value)</span>. 
@@ -303,7 +303,7 @@ export default function SAWExecution() {
                           <p className="text-sm font-bold text-slate-900">{s.name}</p>
                         </td>
                         {criteria.map(c => (
-                          <td key={c.id} className="px-8 py-5 text-center font-black text-indigo-600 text-sm">
+                          <td key={c.id} className="px-8 py-5 text-center font-black text-emerald-600 text-sm">
                             {(normalizationMatrix[s.id]?.[c.id] || 0).toFixed(3)}
                           </td>
                         ))}
@@ -323,12 +323,12 @@ export default function SAWExecution() {
                 "p-8 rounded-[2.5rem] border transition-all relative overflow-hidden group",
                 i === 0 ? "bg-slate-900 text-white border-slate-800 scale-105 shadow-2xl z-10" : "bg-white border-slate-100 shadow-xl"
               )}>
-                {i === 0 && <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full" />}
+                {i === 0 && <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 blur-3xl rounded-full" />}
                 
                 <div className="flex justify-between items-start mb-6 relative z-10">
                   <div className={cn(
                     "w-12 h-12 rounded-2xl flex items-center justify-center font-black",
-                    i === 0 ? "bg-indigo-600 shadow-lg shadow-indigo-500/50 text-white" : "bg-slate-50 text-slate-400"
+                    i === 0 ? "bg-emerald-600 shadow-lg shadow-emerald-500/50 text-white" : "bg-slate-50 text-slate-400"
                   )}>
                     {i + 1}
                   </div>
@@ -344,7 +344,7 @@ export default function SAWExecution() {
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">Final Preference Score</p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black tracking-tighter text-indigo-500">{res.score.toFixed(4)}</span>
+                      <span className="text-4xl font-black tracking-tighter text-emerald-500">{res.score.toFixed(4)}</span>
                       <span className="text-xs font-black text-slate-400">/ 1.0</span>
                     </div>
                   </div>

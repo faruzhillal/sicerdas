@@ -76,7 +76,7 @@ export default function AwardedStudentsManager() {
             placeholder="Cari nama siswa atau jenis beasiswa..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+            className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
           />
         </div>
       </div>
@@ -91,11 +91,11 @@ export default function AwardedStudentsManager() {
           </div>
         ) : filtered.map((student) => (
           <div key={student.id} className="bg-white rounded-[2rem] border border-slate-100 p-6 hover:shadow-xl transition-all group overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-500" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-500" />
             
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-100">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-100">
                   <User size={24} />
                 </div>
                 <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
@@ -110,7 +110,7 @@ export default function AwardedStudentsManager() {
 
               <div className="p-4 bg-slate-50 rounded-2xl mb-6 space-y-3">
                 <div className="flex items-center gap-3">
-                  <GraduationCap className="text-indigo-600" size={16} />
+                  <GraduationCap className="text-emerald-600" size={16} />
                   <span className="text-xs font-bold text-slate-700">{student.scholarshipName}</span>
                 </div>
                 <div className="flex items-center gap-3">

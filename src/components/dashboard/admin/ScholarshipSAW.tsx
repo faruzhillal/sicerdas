@@ -197,7 +197,7 @@ export default function ScholarshipSAW() {
 
   if (loading && scholarships.length === 0) return (
     <div className="h-[60vh] flex items-center justify-center">
-      <Loader2 className="animate-spin text-indigo-600" size={32} />
+      <Loader2 className="animate-spin text-emerald-600" size={32} />
     </div>
   );
 
@@ -205,7 +205,7 @@ export default function ScholarshipSAW() {
     <div className="space-y-10 pb-20 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2 uppercase italic">Selection SAW <span className="text-indigo-600">Beasiswa</span></h1>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2 uppercase italic">Selection SAW <span className="text-emerald-600">Beasiswa</span></h1>
           <p className="text-slate-500 font-medium">Lakukan seleksi beasiswa secara objektif dengan metode SAW.</p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
@@ -214,7 +214,7 @@ export default function ScholarshipSAW() {
                 <button 
                 onClick={executeSAW}
                 disabled={applications.length === 0 || criteria.length === 0}
-                className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-black flex items-center gap-3 hover:bg-slate-900 transition-all shadow-xl shadow-indigo-100 disabled:opacity-50"
+                className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-black flex items-center gap-3 hover:bg-slate-900 transition-all shadow-xl shadow-emerald-100 disabled:opacity-50"
                 >
                 {calculating ? <Loader2 size={18} className="animate-spin" /> : <Calculator size={18} />}
                 Hitung Ranking
@@ -223,7 +223,7 @@ export default function ScholarshipSAW() {
           ) : (
             <button 
               onClick={() => setStep(1)}
-              className="px-6 py-3 bg-slate-900 text-white rounded-xl font-black transition-all hover:bg-indigo-600"
+              className="px-6 py-3 bg-slate-900 text-white rounded-xl font-black transition-all hover:bg-emerald-600"
             >
               Ulangi Perhitungan
             </button>
@@ -234,7 +234,7 @@ export default function ScholarshipSAW() {
       {step === 1 && (
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center gap-6 justify-between">
             <div className="flex items-center gap-4 w-full sm:w-auto">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                     <GraduationCap size={24} />
                 </div>
                 <div className="flex-1">
@@ -254,11 +254,11 @@ export default function ScholarshipSAW() {
             <div className="flex gap-8 border-l border-slate-100 pl-8 hidden lg:flex">
                 <div className="text-center">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Pendaftar</p>
-                    <p className="text-xl font-black text-indigo-600">{applications.length}</p>
+                    <p className="text-xl font-black text-emerald-600">{applications.length}</p>
                 </div>
                 <div className="text-center">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Kriteria</p>
-                    <p className="text-xl font-black text-indigo-600">{criteria.length}</p>
+                    <p className="text-xl font-black text-emerald-600">{criteria.length}</p>
                 </div>
             </div>
         </div>
@@ -266,11 +266,11 @@ export default function ScholarshipSAW() {
 
       {/* Stepper */}
       <div className="flex items-center gap-4 bg-white p-4 rounded-full border border-slate-100 w-fit">
-        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 1 ? "bg-indigo-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>01 Data Pendaftar</div>
+        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 1 ? "bg-emerald-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>01 Data Pendaftar</div>
         <ArrowRight size={14} className="text-slate-300" />
-        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 2 ? "bg-indigo-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>02 Normalisasi</div>
+        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 2 ? "bg-emerald-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>02 Normalisasi</div>
         <ArrowRight size={14} className="text-slate-300" />
-        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 3 ? "bg-indigo-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>03 Rekomendasi Ranking</div>
+        <div className={cn("px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase transition-all", step === 3 ? "bg-emerald-600 text-white shadow-lg" : "bg-slate-50 text-slate-400")}>03 Rekomendasi Ranking</div>
       </div>
 
       {applications.length === 0 && !loading ? (
@@ -284,7 +284,7 @@ export default function ScholarshipSAW() {
       ) : step === 1 ? (
         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl overflow-hidden">
           <div className="p-8 border-b border-slate-50 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <TableIcon size={20} />
             </div>
             <div>
@@ -322,7 +322,7 @@ export default function ScholarshipSAW() {
         </div>
       ) : step === 2 ? (
         <div className="space-y-8">
-           <div className="bg-indigo-600 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+           <div className="bg-emerald-600 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
               <div className="relative z-10 flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
@@ -332,12 +332,12 @@ export default function ScholarshipSAW() {
                 </div>
                 <button 
                   onClick={() => setStep(3)}
-                  className="px-8 py-3 bg-white text-indigo-600 rounded-xl font-black text-sm hover:bg-slate-900 hover:text-white transition-all shadow-lg"
+                  className="px-8 py-3 bg-white text-emerald-600 rounded-xl font-black text-sm hover:bg-slate-900 hover:text-white transition-all shadow-lg"
                 >
                   Lihat Rekomendasi Rank
                 </button>
               </div>
-              <p className="text-indigo-100/80 text-sm font-medium leading-relaxed max-w-2xl relative z-10">
+              <p className="text-emerald-100/80 text-sm font-medium leading-relaxed max-w-2xl relative z-10">
                 Nilai IPK, Tanggungan, dan Prestasi bersifat <span className="text-white font-black">Benefit</span>, sedangkan Penghasilan bersifat <span className="text-white font-black">Cost</span>.
               </p>
            </div>
@@ -360,10 +360,10 @@ export default function ScholarshipSAW() {
                         <td className="px-8 py-5">
                           <p className="text-sm font-bold text-slate-900">{app.studentName}</p>
                         </td>
-                        <td className="px-8 py-5 text-center font-black text-indigo-600 text-sm">{(normalizationMatrix[app.id]?.['gpa'] || 0).toFixed(3)}</td>
-                        <td className="px-8 py-5 text-center font-black text-indigo-600 text-sm">{(normalizationMatrix[app.id]?.['income'] || normalizationMatrix[app.id]?.['parentIncomeValue'] || 0).toFixed(3)}</td>
-                        <td className="px-8 py-5 text-center font-black text-indigo-600 text-sm">{(normalizationMatrix[app.id]?.['dependents'] || 0).toFixed(3)}</td>
-                        <td className="px-8 py-5 text-center font-black text-indigo-600 text-sm">{(normalizationMatrix[app.id]?.['achievements'] || 0).toFixed(3)}</td>
+                        <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['gpa'] || 0).toFixed(3)}</td>
+                        <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['income'] || normalizationMatrix[app.id]?.['parentIncomeValue'] || 0).toFixed(3)}</td>
+                        <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['dependents'] || 0).toFixed(3)}</td>
+                        <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['achievements'] || 0).toFixed(3)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -382,16 +382,16 @@ export default function ScholarshipSAW() {
                         <div className="flex items-center gap-6">
                             <div className={cn(
                                 "w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm",
-                                i === 0 ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400"
+                                i === 0 ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-400"
                             )}>
                                 {i + 1}
                             </div>
                             <div>
-                                <h3 className="font-black text-slate-900 group-hover:text-indigo-600 transition-colors" style={i === 0 ? { color: 'white' } : {}}>{res.name}</h3>
+                                <h3 className="font-black text-slate-900 group-hover:text-emerald-600 transition-colors" style={i === 0 ? { color: 'white' } : {}}>{res.name}</h3>
                                 <div className="flex items-center gap-3">
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{res.class}</p>
                                     <div className="w-1 h-1 rounded-full bg-slate-200" />
-                                    <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Score: {res.score.toFixed(4)}</p>
+                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Score: {res.score.toFixed(4)}</p>
                                 </div>
                             </div>
                         </div>
@@ -421,7 +421,7 @@ export default function ScholarshipSAW() {
                     </div>
                     <div className="p-4 bg-slate-50 rounded-2xl flex items-center justify-between">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Metode Perhitungan</span>
-                        <span className="text-sm font-black text-indigo-600 uppercase">SAW BENEFIT/COST</span>
+                        <span className="text-sm font-black text-emerald-600 uppercase">SAW BENEFIT/COST</span>
                     </div>
                 </div>
 

@@ -42,7 +42,7 @@ export default function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-indigo-100 selection:text-indigo-900">
+        <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-emerald-100 selection:text-emerald-900">
           <Navbar />
           <main className="flex-grow">
             <Routes>

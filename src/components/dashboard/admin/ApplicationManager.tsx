@@ -97,7 +97,7 @@ export default function ApplicationManager() {
         <div className="flex gap-2">
           <Link 
             to="/dashboard/scholarship-saw"
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold text-xs flex items-center gap-2 uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-indigo-100"
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-xs flex items-center gap-2 uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-emerald-100"
           >
             <Zap size={14} /> Proses Seleksi SAW
           </Link>
@@ -112,7 +112,7 @@ export default function ApplicationManager() {
             placeholder="Cari nama siswa atau beasiswa..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export default function ApplicationManager() {
           <select 
             value={scholarshipFilter}
             onChange={(e) => setScholarshipFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
+            className="px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
           >
             <option value="all">Semua Program</option>
             {scholarships.map(s => (
@@ -130,7 +130,7 @@ export default function ApplicationManager() {
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
+            className="px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
           >
             <option value="all">Semua Status</option>
             <option value="pending">Menunggu</option>
@@ -152,7 +152,7 @@ export default function ApplicationManager() {
               onClick={() => setSelectedApp(app)}
               className={cn(
                 "p-5 rounded-2xl border transition-all cursor-pointer hover:shadow-md relative",
-                selectedApp?.id === app.id ? 'bg-indigo-50 border-indigo-200 ring-1 ring-indigo-200' : 'bg-white border-slate-100'
+                selectedApp?.id === app.id ? 'bg-emerald-50 border-emerald-200 ring-1 ring-emerald-200' : 'bg-white border-slate-100'
               )}
             >
               <div className="flex justify-between items-start mb-3">
@@ -178,7 +178,7 @@ export default function ApplicationManager() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-slate-500 mb-1">Beasiswa yang diajukan:</p>
-                  <p className="text-sm font-bold text-indigo-600">{app.scholarshipName}</p>
+                  <p className="text-sm font-bold text-emerald-600">{app.scholarshipName}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Tanggal</p>
@@ -187,8 +187,8 @@ export default function ApplicationManager() {
               </div>
               {app.spkScore && (
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Skor SPK: <span className="text-indigo-600">{app.spkScore.toFixed(2)}</span></p>
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Skor SPK: <span className="text-emerald-600">{app.spkScore.toFixed(2)}</span></p>
                 </div>
               )}
             </div>
@@ -266,30 +266,30 @@ export default function ApplicationManager() {
 
                 {/* Section: SPK */}
                 {selectedApp.criteriaValues && (
-                  <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
-                    <div className="flex items-center gap-2 mb-3 text-indigo-900">
+                  <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                    <div className="flex items-center gap-2 mb-3 text-emerald-900">
                       <Zap size={14} />
                       <p className="text-[10px] font-black uppercase tracking-widest">Data Kriteria (SPK)</p>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="text-center">
-                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">GPA</p>
-                        <p className="text-sm font-black text-indigo-600">{selectedApp.criteriaValues.gpa}</p>
+                        <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">GPA</p>
+                        <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.gpa}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Tanggungan</p>
-                        <p className="text-sm font-black text-indigo-600">{selectedApp.criteriaValues.dependents}</p>
+                        <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Tanggungan</p>
+                        <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.dependents}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Prestasi</p>
-                        <p className="text-sm font-black text-indigo-600">{selectedApp.criteriaValues.achievements}</p>
+                        <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Prestasi</p>
+                        <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.achievements}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Nilai Inc</p>
-                        <p className="text-sm font-black text-indigo-600">{selectedApp.criteriaValues.parentIncomeValue}</p>
+                        <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Nilai Inc</p>
+                        <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.parentIncomeValue}</p>
                       </div>
                     </div>
-                    <p className="mt-3 text-[8px] text-indigo-400 italic text-center">Data di atas digunakan untuk pemeringkatan SAW secara otomatis.</p>
+                    <p className="mt-3 text-[8px] text-emerald-400 italic text-center">Data di atas digunakan untuk pemeringkatan SAW secara otomatis.</p>
                   </div>
                 )}
 
@@ -311,7 +311,7 @@ export default function ApplicationManager() {
                       value={adminComment}
                       onChange={(e) => setAdminComment(e.target.value)}
                       placeholder="Contoh: Dokumen lengkap, segera diverifikasi..."
-                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm min-h-[80px]"
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm min-h-[80px]"
                     />
                   </div>
 

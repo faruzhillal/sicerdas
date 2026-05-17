@@ -169,7 +169,7 @@ export default function AccountManager() {
             });
             setIsModalOpen(true);
           }}
-          className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-slate-900 transition-all shadow-lg shadow-indigo-100"
+          className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-slate-900 transition-all shadow-lg shadow-emerald-100"
         >
           <Plus size={20} /> Tambah Akun
         </button>
@@ -184,7 +184,7 @@ export default function AccountManager() {
               placeholder="Cari user berdasarkan nama atau email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm font-medium transition-all"
+              className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm font-medium transition-all"
             />
           </div>
         </div>
@@ -212,7 +212,7 @@ export default function AccountManager() {
                 <tr key={user.uid} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm uppercase">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm uppercase">
                         {user.fullName?.charAt(0) || '?'}
                       </div>
                       <div>
@@ -229,7 +229,7 @@ export default function AccountManager() {
                     <div className="flex flex-col gap-2">
                       <span className={cn(
                         "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border w-fit",
-                        user.role === 'admin' ? "bg-indigo-50 text-indigo-700 border-indigo-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"
+                        user.role === 'admin' ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"
                       )}>
                         {user.role}
                       </span>
@@ -277,7 +277,7 @@ export default function AccountManager() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="bg-indigo-600 p-8 text-white relative">
+            <div className="bg-emerald-600 p-8 text-white relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
               <div className="flex justify-between items-center mb-4 relative z-10">
                 <h2 className="text-xl font-black">{editingUser ? 'Edit Akun' : 'Tambah Akun Baru'}</h2>
@@ -285,7 +285,7 @@ export default function AccountManager() {
                   <X size={20} />
                 </button>
               </div>
-              <p className="text-indigo-100/80 text-xs font-medium relative z-10 leading-relaxed">
+              <p className="text-emerald-100/80 text-xs font-medium relative z-10 leading-relaxed">
                 Silakan isi informasi profil pengguna. Akun login akan aktif setelah pengguna mendaftar melalui login email/password.
               </p>
             </div>
@@ -299,7 +299,7 @@ export default function AccountManager() {
                     required
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                    className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
                   />
                 </div>
                 <div className="space-y-1">
@@ -309,7 +309,7 @@ export default function AccountManager() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                    className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -318,7 +318,7 @@ export default function AccountManager() {
                     <select 
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium bg-white"
+                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium bg-white"
                     >
                       <option value="student">Student</option>
                       <option value="admin">Admin</option>
@@ -329,7 +329,7 @@ export default function AccountManager() {
                     <select 
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium bg-white"
+                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium bg-white"
                     >
                       <option value="active">Aktif</option>
                       <option value="inactive">Non-Aktif (Ditangguhkan)</option>
@@ -345,7 +345,7 @@ export default function AccountManager() {
                       value={formData.class}
                       onChange={(e) => setFormData({ ...formData, class: e.target.value })}
                       placeholder="Contoh: 1A"
-                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
                     />
                   </div>
                   <div className="space-y-1">
@@ -355,7 +355,7 @@ export default function AccountManager() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="0812xxx"
-                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
                     />
                   </div>
                 </div>
@@ -368,7 +368,7 @@ export default function AccountManager() {
                       value={formData.parentName}
                       onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
                       placeholder="Nama ayah/ibu"
-                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
                     />
                   </div>
                   <div className="space-y-1">
@@ -378,7 +378,7 @@ export default function AccountManager() {
                       value={formData.parentJob}
                       onChange={(e) => setFormData({ ...formData, parentJob: e.target.value })}
                       placeholder="PNS, Buruh, dsb."
-                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
                     />
                   </div>
                 </div>
@@ -389,7 +389,7 @@ export default function AccountManager() {
                     <select 
                       value={formData.parentIncome}
                       onChange={(e) => setFormData({ ...formData, parentIncome: e.target.value })}
-                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium bg-white"
+                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium bg-white"
                     >
                       <option value="">Pilih Range Penghasilan</option>
                       <option value="< Rp 1.000.000">{'< Rp 1.000.000'}</option>
@@ -406,7 +406,7 @@ export default function AccountManager() {
                       value={formData.nisn}
                       onChange={(e) => setFormData({ ...formData, nisn: e.target.value })}
                       placeholder="Nomor Induk Siswa Nasional"
-                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                      className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
                     />
                   </div>
                 </div>
@@ -418,7 +418,7 @@ export default function AccountManager() {
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     placeholder="Alamat domisili..."
-                    className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium resize-none"
+                    className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium resize-none"
                   />
                 </div>
 
@@ -429,7 +429,7 @@ export default function AccountManager() {
                     value={formData.studentId}
                     onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
                     placeholder="Masukkan NIS"
-                    className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                    className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
                   />
                 </div>
 
@@ -465,7 +465,7 @@ export default function AccountManager() {
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-[2] py-3.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-slate-900 transition-all shadow-lg"
+                  className="flex-[2] py-3.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-slate-900 transition-all shadow-lg"
                 >
                   {editingUser ? 'Simpan Perubahan' : 'Buat Akun Profil'}
                 </button>

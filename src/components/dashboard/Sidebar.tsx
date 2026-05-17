@@ -77,10 +77,10 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-80 h-full bg-white border-r border-slate-100 flex flex-col pt-12 pb-8 sticky top-0 overflow-y-auto scrollbar-hide">
-      <div className="px-8 mb-12">
+    <aside className="w-80 h-full bg-white border-r border-slate-100 flex flex-col pt-8 pb-8 sticky top-0 overflow-y-auto scrollbar-hide">
+      <div className="px-6 mb-8">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-indigo-100">
+          <div className="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-emerald-100">
             <GraduationCap size={24} />
           </div>
           <div>
@@ -90,7 +90,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-10">
+      <nav className="flex-1 px-4 space-y-6">
         {isAdmin ? (
           adminSections.map((section, idx) => (
             <div key={idx} className="space-y-4">
@@ -103,8 +103,8 @@ export default function Sidebar() {
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all",
                       location.pathname === link.path 
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" 
-                        : "text-slate-500 hover:bg-slate-50 hover:text-indigo-600"
+                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100" 
+                        : "text-slate-500 hover:bg-slate-50 hover:text-emerald-600"
                     )}
                   >
                     <link.icon size={18} />
@@ -123,8 +123,8 @@ export default function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all",
                   location.pathname === link.path 
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" 
-                    : "text-slate-500 hover:bg-slate-50 hover:text-indigo-600"
+                    ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100" 
+                    : "text-slate-500 hover:bg-slate-50 hover:text-emerald-600"
                 )}
               >
                 <link.icon size={18} />
