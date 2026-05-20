@@ -11,7 +11,8 @@ import {
   FileText,
   Calculator,
   Zap,
-  School
+  School,
+  Newspaper
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../lib/utils';
@@ -40,6 +41,7 @@ export default function Sidebar() {
         { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { name: 'Data Siswa', icon: Users, path: '/dashboard/students' },
         { name: 'Kelola Kelas', icon: School, path: '/dashboard/classes' },
+        { name: 'Kelola Berita', icon: Newspaper, path: '/dashboard/news' },
       ]
     },
     {

@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, GraduationCap, Trophy, LogIn, LayoutDashboard, MessageSquare, Home, Calendar } from 'lucide-react';
+import { Menu, X, GraduationCap, Trophy, LogIn, LayoutDashboard, MessageSquare, Home, Calendar, Info } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../lib/utils';
 
 const navItems = [
   { name: 'Beranda', path: '/', icon: Home },
+  { name: 'Profil Sekolah', path: '/school-detail', icon: Info },
   { name: 'Pemeringkatan', path: '/ranking', icon: Trophy },
   { name: 'Beasiswa', path: '/scholarships', icon: GraduationCap },
   { name: 'Aduan', path: '/complaints', icon: MessageSquare },

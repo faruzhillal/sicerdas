@@ -133,6 +133,21 @@
         "description": { "type": "string" }
       },
       "required": ["id", "name"]
+    },
+    "news": {
+      "title": "School News",
+      "description": "Latest news and articles about the school",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "imageURL": { "type": "string" },
+        "category": { "type": "string" },
+        "author": { "type": "string" },
+        "publishedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "content", "publishedAt"]
     }
   },
   "firestore": {
@@ -171,6 +186,10 @@
     "classes": {
       "schema": "class",
       "description": "Collection of school classes"
+    },
+    "news": {
+      "schema": "news",
+      "description": "Collection of school news and articles"
     }
   }
 }

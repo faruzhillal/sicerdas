@@ -85,6 +85,12 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow write: if isAdmin();
     }
+
+    // 9. News
+    match /news/{docId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
     
     // Testing path
     match /test/connection {

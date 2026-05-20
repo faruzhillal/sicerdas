@@ -15,6 +15,7 @@ import LoginPage from './pages/LoginPage';
 import RankingPage from './pages/RankingPage';
 import ScholarshipPage from './pages/ScholarshipPage';
 import ComplaintsPage from './pages/ComplaintsPage';
+import SchoolDetailPage from './pages/SchoolDetailPage';
 import DashboardPage from './pages/DashboardPage';
 import AuthProvider from './contexts/AuthContext';
 
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="/ranking" element={<RankingPage />} />
               <Route path="/scholarships" element={<ScholarshipPage />} />
               <Route path="/complaints" element={<ComplaintsPage />} />
+              <Route path="/school-detail" element={<SchoolDetailPage />} />
               <Route path="/dashboard/*" element={<DashboardPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

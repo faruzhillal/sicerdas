@@ -16,6 +16,7 @@ import AccountManager from '../components/dashboard/admin/AccountManager';
 import CriteriaSettings from '../components/dashboard/admin/CriteriaSettings';
 import ScholarshipSAW from '../components/dashboard/admin/ScholarshipSAW';
 import ClassManager from '../components/dashboard/admin/ClassManager';
+import NewsManagement from '../components/dashboard/admin/NewsManagement';
 import { LogOut, Bell } from 'lucide-react';
 import { auth } from '../lib/firebase';
 
@@ -46,6 +47,7 @@ export default function DashboardPage() {
     if (path === '/dashboard/classes') return 'Kelola Kelas';
     if (path === '/dashboard/accounts') return 'Pengelola Akun';
     if (path === '/dashboard/criteria') return 'Kriteria Penilaian';
+    if (path === '/dashboard/news') return 'Manajemen Berita Sekolah';
     return 'Dashboard Overview';
   };
 
@@ -102,6 +104,7 @@ export default function DashboardPage() {
                 <Route path="/classes" element={<ClassManager />} />
                 <Route path="/accounts" element={<AccountManager />} />
                 <Route path="/criteria" element={<CriteriaSettings />} />
+                <Route path="/news" element={<NewsManagement />} />
               </Routes>
             ) : (
               <Routes>
