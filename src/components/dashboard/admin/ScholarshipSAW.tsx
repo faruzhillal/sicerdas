@@ -50,6 +50,7 @@ export default function ScholarshipSAW() {
   const [selectedScholarshipId, setSelectedScholarshipId] = useState<string>('');
   const [criteria, setCriteria] = useState<Criterion[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [studentsMap, setStudentsMap] = useState<Map<string, { fullName: string; class: string }>>(new Map());
   const [loading, setLoading] = useState(true);
   const [calculating, setCalculating] = useState(false);
   const [step, setStep] = useState(1); // 1: Select & Data, 2: Normalization, 3: Final Rank
@@ -67,6 +68,19 @@ export default function ScholarshipSAW() {
         const schData = schSnap.docs.map(d => ({ id: d.id, name: d.data().name } as Scholarship));
         setScholarships(schData);
         if (schData.length > 0) setSelectedScholarshipId(schData[0].id);
+
+        // Fetch students map
+        const studentQuery = query(collection(db, 'users'), where('role', '==', 'student'));
+        const studentsSnapshot = await getDocs(studentQuery);
+        const map = new Map<string, { fullName: string; class: string }>();
+        studentsSnapshot.forEach(doc => {
+          const d = doc.data();
+          map.set(doc.id, {
+            fullName: d.fullName || 'Siswa',
+            class: d.class || 'N/A'
+          });
+        });
+        setStudentsMap(map);
 
         // Fetch Criteria
         const critSnap = await getDocs(collection(db, 'criteria'));
@@ -168,11 +182,14 @@ export default function ScholarshipSAW() {
       criteria.forEach(c => {
         total += (normMatrix[app.id][c.id] || 0) * c.weight;
       });
+      const studentInfo = studentsMap.get(app.studentId);
+      const name = studentInfo ? studentInfo.fullName : app.studentName;
+      const clsName = studentInfo ? studentInfo.class : app.studentClass;
       return {
         appId: app.id,
         studentId: app.studentId,
-        name: app.studentName,
-        class: app.studentClass,
+        name: name,
+        class: clsName,
         score: total
       };
     }).sort((a, b) => b.score - a.score);
@@ -304,18 +321,23 @@ export default function ScholarshipSAW() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {applications.map(app => (
-                  <tr key={app.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-8 py-5">
-                      <p className="text-sm font-bold text-slate-900">{app.studentName}</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{app.studentClass}</p>
-                    </td>
-                    <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.gpa || 0}</td>
-                    <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.parentIncomeValue || 5}</td>
-                    <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.dependents || 0}</td>
-                    <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.achievements || 1}</td>
-                  </tr>
-                ))}
+                {applications.map(app => {
+                  const studentInfo = studentsMap.get(app.studentId);
+                  const displayName = studentInfo ? studentInfo.fullName : app.studentName;
+                  const displayClass = studentInfo ? studentInfo.class : app.studentClass;
+                  return (
+                    <tr key={app.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-8 py-5">
+                        <p className="text-sm font-bold text-slate-900">{displayName}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kelas {displayClass}</p>
+                      </td>
+                      <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.gpa || 0}</td>
+                      <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.parentIncomeValue || 5}</td>
+                      <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.dependents || 0}</td>
+                      <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.achievements || 1}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -358,7 +380,7 @@ export default function ScholarshipSAW() {
                     {applications.map(app => (
                       <tr key={app.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="px-8 py-5">
-                          <p className="text-sm font-bold text-slate-900">{app.studentName}</p>
+                          <p className="text-sm font-bold text-slate-900">{studentsMap.get(app.studentId)?.fullName || app.studentName}</p>
                         </td>
                         <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['gpa'] || 0).toFixed(3)}</td>
                         <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['income'] || normalizationMatrix[app.id]?.['parentIncomeValue'] || 0).toFixed(3)}</td>

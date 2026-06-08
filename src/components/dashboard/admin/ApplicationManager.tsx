@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, getDocs, where } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { GraduationCap, Clock, CheckCircle2, XCircle, Search, Filter, Loader2, User, Wallet, FileText, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -32,6 +32,7 @@ interface Application {
 
 export default function ApplicationManager() {
   const [applications, setApplications] = useState<Application[]>([]);
+  const [studentsMap, setStudentsMap] = useState<Map<string, { fullName: string; class: string }>>(new Map());
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -49,8 +50,22 @@ export default function ApplicationManager() {
     };
     fetchScholarships();
 
+    // Listen to current students profile updates
+    const studentsQuery = query(collection(db, 'users'), where('role', '==', 'student'));
+    const unsubscribeStudents = onSnapshot(studentsQuery, (snapshot) => {
+      const map = new Map<string, { fullName: string; class: string }>();
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        map.set(doc.id, {
+          fullName: d.fullName || 'Siswa',
+          class: d.class || 'N/A'
+        });
+      });
+      setStudentsMap(map);
+    });
+
     const q = query(collection(db, 'scholarship_applications'), orderBy('submittedAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribeApps = onSnapshot(q, (snapshot) => {
       const appData = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Application));
       setApplications(appData);
       setLoading(false);
@@ -59,7 +74,10 @@ export default function ApplicationManager() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeStudents();
+      unsubscribeApps();
+    };
   }, []);
 
   const handleStatusUpdate = async (id: string, newStatus: 'approved' | 'rejected') => {
@@ -80,8 +98,10 @@ export default function ApplicationManager() {
   };
 
   const filteredApps = applications.filter(app => {
-    const matchesSearch = app.studentName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         app.scholarshipName.toLowerCase().includes(searchTerm.toLowerCase());
+    const studentInfo = studentsMap.get(app.studentId);
+    const displayName = studentInfo ? studentInfo.fullName : app.studentName;
+    const matchesSearch = displayName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          app.scholarshipName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
     const matchesScholarship = scholarshipFilter === 'all' || app.scholarshipId === scholarshipFilter;
     return matchesSearch && matchesStatus && matchesScholarship;
@@ -161,8 +181,12 @@ export default function ApplicationManager() {
                     <User size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 leading-tight">{app.studentName}</h3>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest font-black">NISN: {app.nisn}</p>
+                    <h3 className="font-bold text-slate-900 leading-tight">
+                      {studentsMap.get(app.studentId)?.fullName || app.studentName}
+                    </h3>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-widest font-black">
+                      NISN: {app.nisn} • Kelas {studentsMap.get(app.studentId)?.class || app.studentClass}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -207,8 +231,12 @@ export default function ApplicationManager() {
                 </div>
                 <div className="flex justify-between items-end">
                   <div>
-                    <p className="text-sm font-bold truncate max-w-[200px]">{selectedApp.studentName}</p>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">Kelas {selectedApp.studentClass}</p>
+                    <p className="text-sm font-bold truncate max-w-[200px]">
+                      {studentsMap.get(selectedApp.studentId)?.fullName || selectedApp.studentName}
+                    </p>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">
+                       Kelas {studentsMap.get(selectedApp.studentId)?.class || selectedApp.studentClass}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Status</p>

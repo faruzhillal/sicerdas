@@ -84,26 +84,46 @@ export default function ScholarshipPage() {
     const fetchRecipients = async () => {
       setLoadingRecipients(true);
       try {
+        // Fetch current students from users for real-time class maps
+        const studentsSnapshot = await getDocs(query(collection(db, 'users'), where('role', '==', 'student')));
+        const studentsMapped = new Map<string, { fullName: string; class: string }>();
+        studentsSnapshot.docs.forEach(doc => {
+          const data = doc.data();
+          studentsMapped.set(doc.id, {
+            fullName: data.fullName || 'Siswa',
+            class: data.class || ''
+          });
+        });
+
+        // Fetch registered classes in the database
+        const classesSnapshot = await getDocs(query(collection(db, 'classes'), orderBy('name', 'asc')));
+        const dbClasses = classesSnapshot.docs.map(doc => doc.data().name as string);
+        const classesList = dbClasses.length > 0 ? dbClasses : ['1A', '1B', '2A', '2B', '3A', '3B'];
+
         const q = query(
           collection(db, 'scholarship_applications'),
           where('status', '==', 'approved'),
           limit(10)
         );
         const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          studentName: doc.data().studentName,
-          studentClass: doc.data().studentClass,
-          scholarshipName: doc.data().scholarshipName,
-          awardedAt: doc.data().awardedAt || doc.data().submittedAt
-        } as Recipient));
+        const data = snapshot.docs.map(doc => {
+          const docData = doc.data();
+          const studentInfo = studentsMapped.get(docData.studentId);
+          return {
+            id: doc.id,
+            studentName: studentInfo ? studentInfo.fullName : (docData.studentName || 'Siswa'),
+            studentClass: studentInfo ? studentInfo.class : (docData.studentClass || ''),
+            scholarshipName: docData.scholarshipName || 'Beasiswa',
+            awardedAt: docData.awardedAt || docData.submittedAt
+          } as Recipient;
+        });
 
         if (data.length === 0) {
           const mockRecipients: Recipient[] = [
-            { id: 'r1', studentName: 'Fahri Husam', studentClass: '4A', scholarshipName: 'Beasiswa Tahfidz Quran', awardedAt: '2024-05-10' },
-            { id: 'r2', studentName: 'Rania Salma', studentClass: '5B', scholarshipName: 'Beasiswa Akademik Unggul', awardedAt: '2024-05-12' },
-            { id: 'r3', studentName: 'Zaki Mubarak', studentClass: '3A', scholarshipName: 'Beasiswa Bantuan Sosial', awardedAt: '2024-05-15' },
-            { id: 'r4', studentName: 'Aisyah Putri', studentClass: '6A', scholarshipName: 'Beasiswa Tahfidz Quran', awardedAt: '2024-05-16' },
+            { id: 'r1', studentName: 'Fahri Husam', studentClass: classesList[0 % classesList.length], scholarshipName: 'Beasiswa Tahfidz Quran', awardedAt: '2024-05-10' },
+            { id: 'r2', studentName: 'Rania Salma', studentClass: classesList[1 % classesList.length], scholarshipName: 'Beasiswa Akademik Unggul', awardedAt: '2024-05-12' },
+            { id: 'r3', studentName: 'Zaki Mubarak', studentClass: classesList[2 % classesList.length], scholarshipName: 'Beasiswa Bantuan Sosial', awardedAt: '2024-05-15' },
+            { id: 'r4', studentName: 'Aisyah Putri', studentClass: classesList[3 % classesList.length], scholarshipName: 'Beasiswa Tahfidz Quran', awardedAt: '2024-05-16' },
           ];
           setRecipients(mockRecipients);
         } else {
@@ -272,10 +292,11 @@ export default function ScholarshipPage() {
                   <h3 className="text-lg font-black text-slate-900 line-clamp-1">{recipient.studentName}</h3>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Kelas {recipient.studentClass}</p>
                   
-                  <div className="p-3 bg-slate-50 rounded-xl mb-4">
+                  <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-xl mb-4">
+                    <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1">Penerima Program Beasiswa:</p>
                     <div className="flex items-center gap-2">
-                       <Award size={14} className="text-amber-500" />
-                       <span className="text-[10px] font-bold text-slate-700 leading-tight">{recipient.scholarshipName}</span>
+                       <Award size={14} className="text-amber-600 shrink-0" />
+                       <span className="text-xs font-black text-slate-800 leading-tight">{recipient.scholarshipName}</span>
                     </div>
                   </div>
                   

@@ -31,7 +31,10 @@ export default function StatCard({ label, value, icon: Icon, trend, color = 'eme
       </div>
       <div>
         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-[0.1em] mb-1">{label}</h3>
-        <p className="text-3xl font-black text-slate-900 tracking-tight">{value}</p>
+        <p className={cn(
+          "font-black text-slate-900 tracking-tight leading-tight",
+          typeof value === 'string' && value.length > 14 ? "text-lg lg:text-xl" : "text-3xl"
+        )}>{value}</p>
       </div>
     </div>
   );

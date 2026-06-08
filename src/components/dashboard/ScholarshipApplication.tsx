@@ -82,6 +82,28 @@ export default function ScholarshipApplication() {
           setAlreadyApplied(true);
           setApplicationMessage("Anda telah mencapai batas maksimal pengajuan (3 kali). Hubungi admin jika merasa ada kesalahan.");
         }
+
+        // Fetch dynamic GPA average
+        const scoresDoc = await getDoc(doc(db, 'criteria_scores', currentUser.uid));
+        if (scoresDoc.exists()) {
+          const scoresData = scoresDoc.data();
+          let total = 0;
+          let cnt = 0;
+          Object.keys(scoresData).forEach(k => {
+            if (typeof scoresData[k] === 'number') {
+              total += scoresData[k];
+              cnt++;
+            }
+          });
+          const average = cnt > 0 ? parseFloat((total / cnt).toFixed(2)) : 0;
+          setFormData(prev => ({
+            ...prev,
+            criteriaValues: {
+              ...prev.criteriaValues,
+              gpa: average
+            }
+          }));
+        }
       } catch (error) {
         console.error("Error checking application:", error);
       } finally {

@@ -22,9 +22,13 @@ export default function StudentDashboard() {
       try {
         setLoading(true);
         
-        // 1. Fetch Rank
-        const rankingDoc = await getDoc(doc(db, 'rankings', currentUser.uid));
-        const rankData = rankingDoc.data();
+        // 1. Fetch criteria and weights
+        const criteriaSnapshot = await getDocs(collection(db, 'criteria'));
+        const criteriaList = criteriaSnapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name as string,
+          weight: doc.data().weight || 0
+        }));
 
         // 2. Fetch Scores for average
         const scoresDoc = await getDoc(doc(db, 'criteria_scores', currentUser.uid));
@@ -32,23 +36,104 @@ export default function StudentDashboard() {
         
         let total = 0;
         let count = 0;
-        Object.keys(scoresData).forEach(k => {
-          if (typeof scoresData[k] === 'number') {
-            total += scoresData[k];
+        criteriaList.forEach(c => {
+          if (scoresData[c.id] !== undefined) {
+            total += Number(scoresData[c.id]);
             count++;
           }
         });
         const average = count > 0 ? (total / count).toFixed(1) : '0';
 
-        // 3. Fetch Applications
+        // 3. Dynamic rank calculation based on the student's registered class
+        let rankStr = '-';
+        if (profile?.class) {
+          // Fetch all students in the same class
+          const studentsSnap = await getDocs(query(
+            collection(db, 'users'),
+            where('role', '==', 'student'),
+            where('class', '==', profile.class)
+          ));
+
+          // Fetch all scores
+          const scoresSnap = await getDocs(collection(db, 'criteria_scores'));
+          const scoresMap = new Map();
+          scoresSnap.forEach(d => {
+            scoresMap.set(d.id, d.data());
+          });
+
+          // Fallback static criteria if database is empty
+          const activeCriteria = criteriaList.length > 0 ? criteriaList : [
+            { id: 'academic', name: 'Akademik', weight: 0.4 },
+            { id: 'tahfidz', name: 'Tahfidz', weight: 0.3 },
+            { id: 'behavior', name: 'Perilaku', weight: 0.2 },
+            { id: 'attendance', name: 'Presensi', weight: 0.1 },
+          ];
+
+          // Compute weighted sum for each student in the class
+          const classStudentsScores = studentsSnap.docs.map(studentDoc => {
+            const studentId = studentDoc.id;
+            const sScores = scoresMap.get(studentId) || {};
+            
+            let totalWeighted = 0;
+            activeCriteria.forEach(c => {
+              totalWeighted += (Number(sScores[c.id]) || 0) * c.weight;
+            });
+
+            return {
+              studentId,
+              totalWeighted
+            };
+          });
+
+          // Sort descending
+          classStudentsScores.sort((a, b) => b.totalWeighted - a.totalWeighted);
+
+          // Find current student index
+          const myIndex = classStudentsScores.findIndex(s => s.studentId === currentUser.uid);
+          if (myIndex !== -1) {
+            rankStr = `#${myIndex + 1} dari ${classStudentsScores.length}`;
+          }
+        }
+
+        if (rankStr === '-') {
+          // Fallback to absolute published rank
+          const rankingDoc = await getDoc(doc(db, 'rankings', currentUser.uid));
+          const rankData = rankingDoc.data();
+          if (rankData && rankData.rank) {
+             rankStr = `#${rankData.rank}`;
+          }
+        }
+
+        // 4. Fetch Applications to check scholarship award detail
         const appQuery = query(
           collection(db, 'scholarship_applications'),
           where('studentId', '==', currentUser.uid),
-          orderBy('submittedAt', 'desc'),
-          limit(3)
+          orderBy('submittedAt', 'desc')
         );
         const appSnap = await getDocs(appQuery);
-        const appList = appSnap.docs.map(d => ({ 
+        
+        let scholarshipStatusText = 'Belum Ada';
+        
+        const approvedApp = appSnap.docs.find(d => d.data().status === 'approved');
+        const pendingApp = appSnap.docs.find(d => d.data().status === 'pending');
+        const rejectedApp = appSnap.docs.find(d => d.data().status === 'rejected');
+
+        if (approvedApp) {
+          scholarshipStatusText = approvedApp.data().scholarshipName || 'Disetujui';
+        } else if (pendingApp) {
+          scholarshipStatusText = `Pending: ${pendingApp.data().scholarshipName || 'Seleksi'}`;
+        } else if (rejectedApp) {
+          scholarshipStatusText = `Belum Lolos: ${rejectedApp.data().scholarshipName || 'Seleksi'}`;
+        }
+
+        setStats({
+          rank: rankStr,
+          avgScore: average,
+          scholarshipStatus: scholarshipStatusText
+        });
+
+        // Map recent 3 items for activities timeline
+        const appList = appSnap.docs.slice(0, 3).map(d => ({ 
           id: d.id, 
           title: `Pendaftaran ${d.data().scholarshipName}`,
           type: 'Beasiswa',
@@ -56,7 +141,7 @@ export default function StudentDashboard() {
           status: d.data().status === 'pending' ? 'Menunggu' : d.data().status === 'approved' ? 'Disetujui' : 'Ditolak'
         }));
 
-        // 4. Fetch Complaints
+        // 5. Fetch Complaints
         const compQuery = query(
           collection(db, 'complaints'),
           where('studentId', '==', currentUser.uid),
@@ -72,13 +157,6 @@ export default function StudentDashboard() {
           status: d.data().status === 'new' ? 'Baru' : d.data().status === 'in_progress' ? 'Diproses' : 'Selesai'
         }));
 
-        setStats({
-          rank: rankData ? `#${rankData.rank || '?'}` : '-',
-          avgScore: average,
-          scholarshipStatus: appList.length > 0 ? appList[0].status : 'Belum Ada'
-        });
-
-        // Combine activities (mock score updates for UI flair)
         const allActivities = [
           ...appList,
           ...compList,
@@ -97,7 +175,7 @@ export default function StudentDashboard() {
     };
 
     fetchData();
-  }, [currentUser]);
+  }, [currentUser, profile]);
 
   if (loading) return (
     <div className="h-[60vh] flex items-center justify-center">

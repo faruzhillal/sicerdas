@@ -19,6 +19,7 @@ export default function StudentManager() {
   const [classes, setClasses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedClassFilter, setSelectedClassFilter] = useState('Semua Kelas');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -93,11 +94,14 @@ export default function StudentManager() {
     }
   };
 
-  const filteredStudents = students.filter(s => 
-    (s.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (s.studentId || '').includes(searchTerm) || 
-    (s.email || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStudents = students.filter(s => {
+    const matchesSearch = 
+      (s.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (s.studentId || '').includes(searchTerm) || 
+      (s.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesClass = selectedClassFilter === 'Semua Kelas' || s.class === selectedClassFilter;
+    return matchesSearch && matchesClass;
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-12">
@@ -200,6 +204,19 @@ export default function StudentManager() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm font-bold text-sm"
             />
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Filter Kelas:</span>
+            <select
+              value={selectedClassFilter}
+              onChange={(e) => setSelectedClassFilter(e.target.value)}
+              className="px-4 py-3 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm font-bold text-sm min-w-[150px]"
+            >
+              <option value="Semua Kelas">Semua Kelas</option>
+              {classes.map(c => (
+                <option key={c} value={c}>Kelas {c}</option>
+              ))}
+            </select>
           </div>
         </div>
 

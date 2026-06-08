@@ -136,11 +136,13 @@ export default function SAWExecution() {
     try {
       for (let i = 0; i < finalScores.length; i++) {
         const res = finalScores[i];
+        const scaledScore = Math.round(res.score * 100 * 10) / 10;
         await setDoc(doc(db, 'rankings', res.studentId), {
           studentId: res.studentId,
           studentName: res.name,
           class: res.class,
           totalScore: res.score,
+          score: scaledScore,
           rank: i + 1,
           updatedAt: new Date().toISOString()
         });

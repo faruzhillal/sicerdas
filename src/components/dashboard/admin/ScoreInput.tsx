@@ -23,6 +23,7 @@ const CLASSES = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A
 export default function ScoreInput() {
   const [scores, setScores] = useState<StudentScore[]>([]);
   const [criteria, setCriteria] = useState<Criterion[]>([]);
+  const [classesList, setClassesList] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClass, setSelectedClass] = useState('Semua Kelas');
@@ -35,6 +36,11 @@ export default function ScoreInput() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      
+      // Fetch dynamic classes from Firestore
+      const classesSnapshot = await getDocs(query(collection(db, 'classes'), orderBy('name', 'asc')));
+      const dbClasses = classesSnapshot.docs.map(d => d.data().name as string);
+      setClassesList(dbClasses.length > 0 ? dbClasses : CLASSES);
       
       // Fetch criteria
       const criteriaSnapshot = await getDocs(collection(db, 'criteria'));
@@ -125,6 +131,7 @@ export default function ScoreInput() {
         studentName: student.studentName,
         class: student.class,
         score: Math.round(totalScore * 10) / 10,
+        totalScore: totalScore / 100,
         updatedAt: new Date().toISOString()
       }, { merge: true });
 
@@ -177,7 +184,7 @@ export default function ScoreInput() {
               className="px-6 py-3 border border-slate-100 rounded-2xl text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
             >
               <option>Semua Kelas</option>
-              {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+              {classesList.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
         </div>

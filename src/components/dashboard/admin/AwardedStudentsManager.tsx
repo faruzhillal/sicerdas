@@ -19,16 +19,31 @@ interface AwardedStudent {
 
 export default function AwardedStudentsManager() {
   const [awardedStudents, setAwardedStudents] = useState<AwardedStudent[]>([]);
+  const [studentsMap, setStudentsMap] = useState<Map<string, { fullName: string; class: string }>>(new Map());
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    // Real-time listener for student users info
+    const studentsQuery = query(collection(db, 'users'), where('role', '==', 'student'));
+    const unsubscribeStudents = onSnapshot(studentsQuery, (snapshot) => {
+      const map = new Map<string, { fullName: string; class: string }>();
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        map.set(doc.id, {
+          fullName: d.fullName || 'Siswa',
+          class: d.class || 'N/A'
+        });
+      });
+      setStudentsMap(map);
+    });
+
     const q = query(
       collection(db, 'scholarship_applications'),
       where('status', '==', 'approved')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribeApps = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ 
         id: doc.id, 
         ...doc.data() 
@@ -41,7 +56,10 @@ export default function AwardedStudentsManager() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeStudents();
+      unsubscribeApps();
+    };
   }, []);
 
   const handleDisbursementToggle = async (id: string, currentStatus?: string) => {
@@ -56,10 +74,12 @@ export default function AwardedStudentsManager() {
     }
   };
 
-  const filtered = awardedStudents.filter(s => 
-    s.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.scholarshipName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = awardedStudents.filter(s => {
+    const studentInfo = studentsMap.get(s.studentId);
+    const displayName = studentInfo ? studentInfo.fullName : s.studentName;
+    return displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           s.scholarshipName.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div className="space-y-8">
@@ -104,16 +124,21 @@ export default function AwardedStudentsManager() {
               </div>
 
               <div className="space-y-1 mb-6">
-                <h3 className="text-lg font-black text-slate-900 leading-tight">{student.studentName}</h3>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Kelas {student.studentClass}</p>
+                <h3 className="text-lg font-black text-slate-900 leading-tight">
+                  {studentsMap.get(student.studentId)?.fullName || student.studentName}
+                </h3>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                  Kelas {studentsMap.get(student.studentId)?.class || student.studentClass}
+                </p>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-2xl mb-6 space-y-3">
+              <div className="p-4 bg-gradient-to-r from-teal-50/50 to-emerald-50/50 border border-emerald-100 rounded-2xl mb-6 space-y-3">
+                <p className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">Penerima Program Beasiswa:</p>
                 <div className="flex items-center gap-3">
                   <GraduationCap className="text-emerald-600" size={16} />
-                  <span className="text-xs font-bold text-slate-700">{student.scholarshipName}</span>
+                  <span className="text-xs font-black text-emerald-950">{student.scholarshipName}</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 pt-2 border-t border-emerald-100/50">
                   <Calendar className="text-slate-400" size={16} />
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tahun Ajaran 2024/2025</span>
                 </div>
