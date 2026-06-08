@@ -47,60 +47,47 @@ export default function StudentDashboard() {
         // 3. Dynamic rank calculation based on the student's registered class
         let rankStr = '-';
         if (profile?.class) {
-          // Fetch all students in the same class
-          const studentsSnap = await getDocs(query(
-            collection(db, 'users'),
-            where('role', '==', 'student'),
-            where('class', '==', profile.class)
-          ));
-
-          // Fetch all scores
-          const scoresSnap = await getDocs(collection(db, 'criteria_scores'));
-          const scoresMap = new Map();
-          scoresSnap.forEach(d => {
-            scoresMap.set(d.id, d.data());
-          });
-
-          // Fallback static criteria if database is empty
-          const activeCriteria = criteriaList.length > 0 ? criteriaList : [
-            { id: 'academic', name: 'Akademik', weight: 0.4 },
-            { id: 'tahfidz', name: 'Tahfidz', weight: 0.3 },
-            { id: 'behavior', name: 'Perilaku', weight: 0.2 },
-            { id: 'attendance', name: 'Presensi', weight: 0.1 },
-          ];
-
-          // Compute weighted sum for each student in the class
-          const classStudentsScores = studentsSnap.docs.map(studentDoc => {
-            const studentId = studentDoc.id;
-            const sScores = scoresMap.get(studentId) || {};
+          try {
+            // Fetch rankings for members of this class from published rankings
+            const classRankQuery = query(
+              collection(db, 'rankings'),
+              where('class', '==', profile.class)
+            );
+            const rankSnap = await getDocs(classRankQuery);
             
-            let totalWeighted = 0;
-            activeCriteria.forEach(c => {
-              totalWeighted += (Number(sScores[c.id]) || 0) * c.weight;
-            });
+            if (!rankSnap.empty) {
+              const classRankings = rankSnap.docs.map(doc => {
+                const data = doc.data();
+                return {
+                  studentId: data.studentId || doc.id,
+                  score: Number(data.score) || 0
+                };
+              });
 
-            return {
-              studentId,
-              totalWeighted
-            };
-          });
+              // Sort them descending by score
+              classRankings.sort((a, b) => b.score - a.score);
 
-          // Sort descending
-          classStudentsScores.sort((a, b) => b.totalWeighted - a.totalWeighted);
-
-          // Find current student index
-          const myIndex = classStudentsScores.findIndex(s => s.studentId === currentUser.uid);
-          if (myIndex !== -1) {
-            rankStr = `#${myIndex + 1} dari ${classStudentsScores.length}`;
+              // Find current student index in their class
+              const myClassIndex = classRankings.findIndex(r => r.studentId === currentUser.uid);
+              if (myClassIndex !== -1) {
+                rankStr = `#${myClassIndex + 1} dari ${classRankings.length}`;
+              }
+            }
+          } catch (rankErr) {
+            console.error("Error calculating class rank from rankings collection:", rankErr);
           }
         }
 
         if (rankStr === '-') {
-          // Fallback to absolute published rank
-          const rankingDoc = await getDoc(doc(db, 'rankings', currentUser.uid));
-          const rankData = rankingDoc.data();
-          if (rankData && rankData.rank) {
-             rankStr = `#${rankData.rank}`;
+          // Fallback to absolute published rank doc
+          try {
+            const rankingDoc = await getDoc(doc(db, 'rankings', currentUser.uid));
+            const rankData = rankingDoc.data();
+            if (rankData && rankData.rank) {
+              rankStr = `#${rankData.rank}`;
+            }
+          } catch (err) {
+            console.error("Error fetching fallback absolute rank:", err);
           }
         }
 

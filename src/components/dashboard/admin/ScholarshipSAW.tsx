@@ -82,19 +82,13 @@ export default function ScholarshipSAW() {
         });
         setStudentsMap(map);
 
-        // Fetch Criteria
-        const critSnap = await getDocs(collection(db, 'criteria'));
-        let critData = critSnap.docs.map(d => ({ id: d.id, ...d.data() } as Criterion));
-        
-        // If criteria not present, we use default scholarship criteria mapping
-        if (critData.length === 0) {
-            critData = [
-                { id: 'gpa', name: 'IPK / Rata-rata', weight: 0.4, type: 'benefit' },
-                { id: 'income', name: 'Penghasilan', weight: 0.3, type: 'cost' },
-                { id: 'dependents', name: 'Tanggungan', weight: 0.2, type: 'benefit' },
-                { id: 'achievements', name: 'Prestasi', weight: 0.1, type: 'benefit' }
-            ];
-        }
+        // Use fixed dedicated scholarship criteria mapping
+        const critData: Criterion[] = [
+            { id: 'gpa', name: 'IPK / Rata-rata', weight: 0.4, type: 'benefit' },
+            { id: 'income', name: 'Penghasilan', weight: 0.3, type: 'cost' },
+            { id: 'dependents', name: 'Tanggungan', weight: 0.2, type: 'benefit' },
+            { id: 'achievements', name: 'Prestasi', weight: 0.1, type: 'benefit' }
+        ];
         setCriteria(critData);
       } catch (e) {
         console.error(e);
@@ -413,7 +407,7 @@ export default function ScholarshipSAW() {
                                 <div className="flex items-center gap-3">
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{res.class}</p>
                                     <div className="w-1 h-1 rounded-full bg-slate-200" />
-                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Score: {res.score.toFixed(4)}</p>
+                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Skor Akhir: {Math.round(res.score * 100)}</p>
                                 </div>
                             </div>
                         </div>

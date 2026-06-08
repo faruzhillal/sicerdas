@@ -31,7 +31,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isSignedIn();
       allow create, update, delete: if isSignedIn() && (isOwner(userId) || isAdmin());
-      allow list: if isAdmin();
+      allow list: if isSignedIn();
     }
 
     // 2. Rankings Collection

@@ -86,69 +86,77 @@ export default function RankingPage() {
           });
         });
 
-        // 4. Fetch all rankings from DB to cross-reference
+        // 4. Fetch all rankings from DB
         const rankingsSnapshot = await getDocs(collection(db, 'rankings'));
-        const rankingsMap = new Map<string, any>();
-        rankingsSnapshot.docs.forEach(doc => {
-          rankingsMap.set(doc.id, doc.data());
+        let rankingsData: Ranking[] = rankingsSnapshot.docs.map(doc => {
+          const docData = doc.data();
+          // Fallback between score and totalScore
+          const rawScore = docData.score !== undefined ? docData.score : (docData.totalScore !== undefined ? docData.totalScore : 0);
+          
+          // Cross-reference with current student data to fetch real-time edits (class, name, etc.)
+          const studentInfo = studentsMapped.get(doc.id);
+          const studentName = studentInfo ? studentInfo.fullName : (docData.studentName || 'Siswa');
+          const studentClass = studentInfo ? studentInfo.class : (docData.class || '');
+
+          return {
+            id: doc.id,
+            studentName: studentName,
+            class: studentClass,
+            score: typeof rawScore === 'number' ? rawScore : parseFloat(rawScore) || 0,
+            rank: docData.rank || 0,
+            updatedAt: docData.updatedAt || ''
+          };
         });
 
-        // 5. Fetch all criteria scores from DB to calculate fallback
-        const scoresSnapshot = await getDocs(collection(db, 'criteria_scores'));
-        const scoresMap = new Map<string, any>();
-        scoresSnapshot.docs.forEach(doc => {
-          scoresMap.set(doc.id, doc.data());
-        });
-
-        const activeCriteria = criteriaData.length > 0 ? criteriaData : [
-          { id: 'academic', name: 'Akademik', weight: 0.4 },
-          { id: 'tahfidz', name: 'Tahfidz', weight: 0.3 },
-          { id: 'behavior', name: 'Perilaku', weight: 0.2 },
-          { id: 'attendance', name: 'Presensi', weight: 0.1 },
-        ];
-
-        let compiledRankings: Ranking[] = [];
-
-        if (studentsSnapshot.docs.length > 0) {
-          studentsSnapshot.docs.forEach((studentDoc) => {
-            const studentId = studentDoc.id;
-            const uData = studentDoc.data();
-            const rData = rankingsMap.get(studentId);
-            const sScores = scoresMap.get(studentId) || {};
-
-            // Calculate dynamic weighted score as fallback
-            let totalWeightedScore = 0;
-            activeCriteria.forEach(c => {
-              totalWeightedScore += (Number(sScores[c.id]) || 0) * c.weight;
+        // If there's no rankings at all, let's try to generate rankings from active student data first!
+        if (rankingsData.length === 0) {
+          try {
+            const generatedFromDB: Ranking[] = [];
+            
+            // Fetch criteria scores (this will fail gracefully for student roles)
+            const scoresSnapshot = await getDocs(collection(db, 'criteria_scores'));
+            const scoresMap = new Map<string, any>();
+            scoresSnapshot.docs.forEach(doc => {
+              scoresMap.set(doc.id, doc.data());
             });
+            
+            const activeCriteria = criteriaData.length > 0 ? criteriaData : [
+              { id: 'academic', name: 'Akademik', weight: 0.4 },
+              { id: 'tahfidz', name: 'Tahfidz', weight: 0.3 },
+              { id: 'behavior', name: 'Perilaku', weight: 0.2 },
+              { id: 'attendance', name: 'Presensi', weight: 0.1 },
+            ];
 
-            let finalScore = 0;
-            if (rData) {
-              const rawScore = rData.score !== undefined ? rData.score : (rData.totalScore !== undefined ? rData.totalScore : 0);
-              let parsedScore = typeof rawScore === 'number' ? rawScore : parseFloat(rawScore) || 0;
-              // Normalize decimal fraction values (e.g. 0.9 -> 90) to ensure consistent scale
-              if (parsedScore > 0 && parsedScore <= 1.0) {
-                parsedScore = parsedScore * 100;
-              }
-              finalScore = parsedScore;
-            } else {
-              // Fallback to dynamic weighted raw average from criteria_scores
-              finalScore = Math.round(totalWeightedScore * 10) / 10;
+            if (studentsSnapshot.docs.length > 0) {
+              studentsSnapshot.docs.forEach((studentDoc) => {
+                const uData = studentDoc.data();
+                const studentId = studentDoc.id;
+                const sScores = scoresMap.get(studentId) || {};
+                
+                // Calculate weighted score
+                let totalScore = 0;
+                activeCriteria.forEach(c => {
+                  totalScore += (Number(sScores[c.id]) || 0) * c.weight;
+                });
+
+                generatedFromDB.push({
+                  id: studentId,
+                  studentName: uData.fullName || 'Siswa',
+                  class: uData.class || '',
+                  score: Math.round(totalScore * 10) / 10,
+                  rank: 0, // Will be computed per-class
+                  updatedAt: sScores.updatedAt || ''
+                });
+              });
+              rankingsData = generatedFromDB;
             }
-
-            compiledRankings.push({
-              id: studentId,
-              studentName: uData.fullName || 'Siswa',
-              class: uData.class || '',
-              score: finalScore,
-              rank: rData?.rank || 0,
-              updatedAt: rData?.updatedAt || sScores.updatedAt || ''
-            });
-          });
+          } catch (scoresError) {
+            console.warn("Could not calculate dynamic ranks on the fly (probably a student):", scoresError);
+          }
         }
 
         // If still empty (no students in DB at all), provide completely mock rankings
-        if (compiledRankings.length === 0) {
+        if (rankingsData.length === 0) {
           const generatedMock: Ranking[] = [];
           classesData.forEach((cls) => {
             const studentsInClass = [
@@ -170,10 +178,10 @@ export default function RankingPage() {
               });
             });
           });
-          compiledRankings = generatedMock;
+          rankingsData = generatedMock;
         }
 
-        setAllRankings(compiledRankings);
+        setAllRankings(rankingsData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {

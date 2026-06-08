@@ -344,10 +344,10 @@ export default function SAWExecution() {
 
                 <div className="flex items-end justify-between relative z-10">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">Final Preference Score</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">Skor Akhir</p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black tracking-tighter text-emerald-500">{res.score.toFixed(4)}</span>
-                      <span className="text-xs font-black text-slate-400">/ 1.0</span>
+                      <span className="text-4xl font-black tracking-tighter text-emerald-500">{Math.round(res.score * 100)}</span>
+                      <span className="text-xs font-black text-slate-400">/ 100</span>
                     </div>
                   </div>
                   <div className="flex gap-2">
