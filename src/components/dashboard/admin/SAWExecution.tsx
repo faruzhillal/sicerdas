@@ -92,7 +92,7 @@ export default function SAWExecution() {
       const values = students.map(s => s.scores[c.id] || 0);
       limits[c.id] = {
         max: Math.max(...values, 0.0001), // avoid div by zero
-        min: Math.min(...values.filter(v => v > 0), 1) // default min for cost
+        min: values.filter(v => v > 0).length > 0 ? Math.min(...values.filter(v => v > 0)) : 1
       };
     });
 
@@ -102,7 +102,8 @@ export default function SAWExecution() {
       normMatrix[s.id] = {};
       criteria.forEach(c => {
         const val = s.scores[c.id] || 0;
-        if (c.type === 'benefit') {
+        const isBenefit = c.type === 'benefit' || !c.type;
+        if (isBenefit) {
           normMatrix[s.id][c.id] = val / limits[c.id].max;
         } else {
           normMatrix[s.id][c.id] = limits[c.id].min / Math.max(val, 0.0001);
@@ -111,11 +112,14 @@ export default function SAWExecution() {
     });
     setNormalizationMatrix(normMatrix);
 
+    const weightSum = criteria.reduce((sum, c) => sum + (c.weight || 0), 0) || 1.0;
+
     // 3. Final Weights Multiplication (V)
     const results = students.map(s => {
       let total = 0;
       criteria.forEach(c => {
-        total += (normMatrix[s.id][c.id] || 0) * c.weight;
+        const normalizedWeight = (c.weight || 0) / weightSum;
+        total += (normMatrix[s.id][c.id] || 0) * normalizedWeight;
       });
       return {
         studentId: s.id,

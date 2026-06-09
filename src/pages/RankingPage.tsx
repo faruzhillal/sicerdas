@@ -98,11 +98,21 @@ export default function RankingPage() {
           const studentName = studentInfo ? studentInfo.fullName : (docData.studentName || 'Siswa');
           const studentClass = studentInfo ? studentInfo.class : (docData.class || '');
 
+          let parsedScore = typeof rawScore === 'number' ? rawScore : parseFloat(rawScore) || 0;
+          // Scale fractional score up (e.g., 0.8543 -> 85.43, or 1.25 -> 96.1)
+          if (parsedScore > 0 && parsedScore <= 5.0) {
+            if (parsedScore > 1.0) {
+              parsedScore = Math.min(100, (parsedScore / 1.3) * 100);
+            } else {
+              parsedScore = parsedScore * 100;
+            }
+          }
+
           return {
             id: doc.id,
             studentName: studentName,
             class: studentClass,
-            score: typeof rawScore === 'number' ? rawScore : parseFloat(rawScore) || 0,
+            score: parsedScore,
             rank: docData.rank || 0,
             updatedAt: docData.updatedAt || ''
           };
@@ -127,16 +137,19 @@ export default function RankingPage() {
               { id: 'attendance', name: 'Presensi', weight: 0.1 },
             ];
 
+            const weightSum = activeCriteria.reduce((sum, c) => sum + (c.weight || 0), 0) || 1.0;
+
             if (studentsSnapshot.docs.length > 0) {
               studentsSnapshot.docs.forEach((studentDoc) => {
                 const uData = studentDoc.data();
                 const studentId = studentDoc.id;
                 const sScores = scoresMap.get(studentId) || {};
                 
-                // Calculate weighted score
+                // Calculate weighted score (using normalized weights)
                 let totalScore = 0;
                 activeCriteria.forEach(c => {
-                  totalScore += (Number(sScores[c.id]) || 0) * c.weight;
+                  const normalizedWeight = (c.weight || 0) / weightSum;
+                  totalScore += (Number(sScores[c.id]) || 0) * normalizedWeight;
                 });
 
                 generatedFromDB.push({
@@ -333,7 +346,7 @@ export default function RankingPage() {
                               </div>
                             </div>
                             <div className="px-3.5 py-1.5 bg-slate-900 border border-slate-800 text-white rounded-full text-xs font-black tracking-tight shrink-0">
-                              {topStudent.score.toFixed(1)} Poin
+                              {Math.round(topStudent.score)} Poin
                             </div>
                           </div>
                         ) : (
@@ -427,7 +440,7 @@ export default function RankingPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nilai Tertinggi</p>
-                  <p className="text-2xl font-black text-slate-900">{highestScore > 0 ? highestScore.toFixed(1) : '-'}</p>
+                  <p className="text-2xl font-black text-slate-900">{highestScore > 0 ? Math.round(highestScore) : '-'}</p>
                 </div>
               </div>
 
@@ -437,7 +450,7 @@ export default function RankingPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nilai Rata-rata Kelas</p>
-                  <p className="text-2xl font-black text-slate-900">{averageScore > 0 ? averageScore.toFixed(1) : '-'}</p>
+                  <p className="text-2xl font-black text-slate-900">{averageScore > 0 ? Math.round(averageScore) : '-'}</p>
                 </div>
               </div>
 
@@ -542,7 +555,7 @@ export default function RankingPage() {
                           {/* Score Display */}
                           <div className="text-right shrink-0 pr-1">
                             <p className="text-xl sm:text-2xl font-black text-slate-900 leading-none mb-1">
-                              {student.score.toFixed(1)}
+                              {Math.round(student.score)}
                             </p>
                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Skor Akhir</p>
                           </div>
@@ -588,7 +601,7 @@ export default function RankingPage() {
                                 return (
                                   <div className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-black shadow-xl">
                                     <p className="mb-0.5">{payload[0].payload.name}</p>
-                                    <p className="text-emerald-400">{payload[0].value} Poin</p>
+                                    <p className="text-emerald-400">{Math.round(payload[0].value as number)} Poin</p>
                                   </div>
                                 );
                               }

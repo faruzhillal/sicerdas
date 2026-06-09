@@ -42,7 +42,8 @@ service cloud.firestore {
 
     // 3. Criteria Scores Collection
     match /criteria_scores/{scoreId} {
-      allow read, write: if isAdmin() || (isSignedIn() && scoreId == request.auth.uid);
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || (isSignedIn() && scoreId == request.auth.uid);
     }
 
     // 4. Scholarships Collection

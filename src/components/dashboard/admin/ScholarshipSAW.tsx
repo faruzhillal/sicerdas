@@ -151,7 +151,7 @@ export default function ScholarshipSAW() {
       const values = applications.map(a => getAppCriteriaValue(a, c.id));
       limits[c.id] = {
         max: Math.max(...values, 0.0001), 
-        min: Math.min(...values.filter(v => v > 0), 1) 
+        min: values.filter(v => v > 0).length > 0 ? Math.min(...values.filter(v => v > 0)) : 1 
       };
     });
 
@@ -161,7 +161,8 @@ export default function ScholarshipSAW() {
       normMatrix[app.id] = {};
       criteria.forEach(c => {
         const val = getAppCriteriaValue(app, c.id);
-        if (c.type === 'benefit') {
+        const isBenefit = c.type === 'benefit' || !c.type;
+        if (isBenefit) {
           normMatrix[app.id][c.id] = val / limits[c.id].max;
         } else {
           normMatrix[app.id][c.id] = limits[c.id].min / Math.max(val, 0.0001);

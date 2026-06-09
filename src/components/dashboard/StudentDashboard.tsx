@@ -42,7 +42,7 @@ export default function StudentDashboard() {
             count++;
           }
         });
-        const average = count > 0 ? (total / count).toFixed(1) : '0';
+        const average = count > 0 ? Math.round(total / count).toString() : '0';
 
         // 3. Dynamic rank calculation based on the student's registered class
         let rankStr = '-';
