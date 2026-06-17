@@ -59,8 +59,13 @@ export default function RankingPage() {
         setCriteria(criteriaData);
 
         // 2. Fetch classes from DB
-        const classesSnapshot = await getDocs(query(collection(db, 'classes'), orderBy('name', 'asc')));
-        let classesData = classesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SchoolClass));
+        let classesData: SchoolClass[] = [];
+        try {
+          const classesSnapshot = await getDocs(query(collection(db, 'classes'), orderBy('name', 'asc')));
+          classesData = classesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SchoolClass));
+        } catch (classesError) {
+          console.warn("Could not fetch classes from DB (guest session):", classesError);
+        }
         
         if (classesData.length === 0) {
           // Provide mock classes if none in DB
@@ -76,15 +81,23 @@ export default function RankingPage() {
         setClasses(classesData);
 
         // 3. Fetch all current students from users collection to have real-time profile mapping
-        const studentsSnapshot = await getDocs(query(collection(db, 'users'), where('role', '==', 'student')));
         const studentsMapped = new Map<string, { fullName: string; class: string }>();
-        studentsSnapshot.docs.forEach(doc => {
-          const data = doc.data();
-          studentsMapped.set(doc.id, {
-            fullName: data.fullName || 'Siswa',
-            class: data.class || ''
+        let hasStudentsDoc = false;
+        let studentsDocs: any[] = [];
+        try {
+          const studentsSnapshot = await getDocs(query(collection(db, 'users'), where('role', '==', 'student')));
+          studentsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            studentsMapped.set(doc.id, {
+              fullName: data.fullName || 'Siswa',
+              class: data.class || ''
+            });
           });
-        });
+          hasStudentsDoc = true;
+          studentsDocs = studentsSnapshot.docs;
+        } catch (studentsError) {
+          console.warn("Could not fetch student profiles from users (guest session):", studentsError);
+        }
 
         // 4. Fetch all rankings from DB
         const rankingsSnapshot = await getDocs(collection(db, 'rankings'));
@@ -139,8 +152,8 @@ export default function RankingPage() {
 
             const weightSum = activeCriteria.reduce((sum, c) => sum + (c.weight || 0), 0) || 1.0;
 
-            if (studentsSnapshot.docs.length > 0) {
-              studentsSnapshot.docs.forEach((studentDoc) => {
+            if (hasStudentsDoc && studentsDocs.length > 0) {
+              studentsDocs.forEach((studentDoc) => {
                 const uData = studentDoc.data();
                 const studentId = studentDoc.id;
                 const sScores = scoresMap.get(studentId) || {};

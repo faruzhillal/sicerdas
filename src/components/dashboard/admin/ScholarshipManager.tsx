@@ -12,6 +12,12 @@ interface Scholarship {
   status: 'open' | 'closed' | 'announced';
   deadline: string;
   benefits: string[];
+  weightAcademic?: number;
+  weightHafalan?: number;
+  weightPerilaku?: number;
+  weightPresensi?: number;
+  weightPenghasilan?: number;
+  weightTanggungan?: number;
 }
 
 export default function ScholarshipManager() {
@@ -26,7 +32,13 @@ export default function ScholarshipManager() {
     description: '',
     status: 'open',
     deadline: '',
-    benefits: []
+    benefits: [],
+    weightAcademic: 0.2,
+    weightHafalan: 0.2,
+    weightPerilaku: 0.15,
+    weightPresensi: 0.15,
+    weightPenghasilan: 0.15,
+    weightTanggungan: 0.15
   });
 
   useEffect(() => {
@@ -42,8 +54,59 @@ export default function ScholarshipManager() {
     return () => unsubscribe();
   }, []);
 
+  const totalWeight = 
+    (formData.weightAcademic || 0) + 
+    (formData.weightHafalan || 0) + 
+    (formData.weightPerilaku || 0) + 
+    (formData.weightPresensi || 0) + 
+    (formData.weightPenghasilan || 0) + 
+    (formData.weightTanggungan || 0);
+
+  const applyTemplate = (type: 'academic' | 'hafalan' | 'balanced') => {
+    if (type === 'academic') {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || 'Beasiswa Akademik',
+        weightAcademic: 0.5,
+        weightHafalan: 0.1,
+        weightPerilaku: 0.1,
+        weightPresensi: 0.1,
+        weightPenghasilan: 0.1,
+        weightTanggungan: 0.1
+      }));
+    } else if (type === 'hafalan') {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || 'Beasiswa Hafalan',
+        weightAcademic: 0.1,
+        weightHafalan: 0.5,
+        weightPerilaku: 0.1,
+        weightPresensi: 0.1,
+        weightPenghasilan: 0.1,
+        weightTanggungan: 0.1
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        weightAcademic: 0.2,
+        weightHafalan: 0.2,
+        weightPerilaku: 0.15,
+        weightPresensi: 0.15,
+        weightPenghasilan: 0.15,
+        weightTanggungan: 0.15
+      }));
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that the total weight sums up closely to 1.0 (allow small floating point deviation)
+    if (Math.abs(totalWeight - 1.0) > 0.01) {
+      alert(`Peringatan: Total bobot kriteria harus 100% (1.0). Total saat ini adalah ${(totalWeight * 100).toFixed(0)}%. Silakan sesuaikan kembali bobot kriteria.`);
+      return;
+    }
+
     try {
       setSaving(true);
       if (editingId) {
@@ -53,7 +116,19 @@ export default function ScholarshipManager() {
       }
       setShowForm(false);
       setEditingId(null);
-      setFormData({ name: '', description: '', status: 'open', deadline: '', benefits: [] });
+      setFormData({ 
+        name: '', 
+        description: '', 
+        status: 'open', 
+        deadline: '', 
+        benefits: [],
+        weightAcademic: 0.2,
+        weightHafalan: 0.2,
+        weightPerilaku: 0.15,
+        weightPresensi: 0.15,
+        weightPenghasilan: 0.15,
+        weightTanggungan: 0.15
+      });
     } catch (error) {
       handleFirestoreError(error, editingId ? OperationType.UPDATE : OperationType.CREATE, 'scholarships');
     } finally {
@@ -103,13 +178,42 @@ export default function ScholarshipManager() {
 
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-8 shadow-2xl">
+          <div className="bg-white rounded-2xl w-full max-w-lg p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-slate-900">{editingId ? 'Edit Program' : 'Tambah Program Beasiswa'}</h2>
               <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600">
                 <X size={24} />
               </button>
             </div>
+            
+            {/* Quick Templates Selection */}
+            <div className="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Preset Cepat Kriteria</p>
+              <div className="flex gap-2">
+                <button 
+                  type="button"
+                  onClick={() => applyTemplate('academic')}
+                  className="px-3 py-1.5 bg-white text-emerald-700 hover:bg-emerald-50 text-xs font-bold border border-slate-200 rounded-lg transition-colors flex-1"
+                >
+                  Akademik
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => applyTemplate('hafalan')}
+                  className="px-3 py-1.5 bg-white text-emerald-700 hover:bg-emerald-50 text-xs font-bold border border-slate-200 rounded-lg transition-colors flex-1"
+                >
+                  Hafalan Hafalan
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => applyTemplate('balanced')}
+                  className="px-3 py-1.5 bg-white text-slate-700 hover:bg-slate-100 text-xs font-bold border border-slate-200 rounded-lg transition-colors flex-1"
+                >
+                  Seimbang
+                </button>
+              </div>
+            </div>
+
             <form onSubmit={handleSave} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Nama Program</label>
@@ -131,6 +235,74 @@ export default function ScholarshipManager() {
                   className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
+              
+              {/* Dynamic Criteria Weight Inputs */}
+              <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100/50 space-y-3">
+                <p className="text-xs font-bold text-emerald-900 uppercase tracking-widest">Bobot Kriteria Penerima (Total 1.0)</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Akademik (0-1.0)</label>
+                    <input 
+                      type="number" step="0.01" min="0" max="1" required
+                      value={formData.weightAcademic ?? 0.2}
+                      onChange={e => setFormData({ ...formData, weightAcademic: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Hafalan (0-1.0)</label>
+                    <input 
+                      type="number" step="0.01" min="0" max="1" required
+                      value={formData.weightHafalan ?? 0.2}
+                      onChange={e => setFormData({ ...formData, weightHafalan: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Perilaku (0-1.0)</label>
+                    <input 
+                      type="number" step="0.01" min="0" max="1" required
+                      value={formData.weightPerilaku ?? 0.15}
+                      onChange={e => setFormData({ ...formData, weightPerilaku: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Presensi (0-1.0)</label>
+                    <input 
+                      type="number" step="0.01" min="0" max="1" required
+                      value={formData.weightPresensi ?? 0.15}
+                      onChange={e => setFormData({ ...formData, weightPresensi: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Ekonomi Cost (0-1.0)</label>
+                    <input 
+                      type="number" step="0.01" min="0" max="1" required
+                      value={formData.weightPenghasilan ?? 0.15}
+                      onChange={e => setFormData({ ...formData, weightPenghasilan: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Tanggungan (0-1.0)</label>
+                    <input 
+                      type="number" step="0.01" min="0" max="1" required
+                      value={formData.weightTanggungan ?? 0.15}
+                      onChange={e => setFormData({ ...formData, weightTanggungan: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white"
+                    />
+                  </div>
+                </div>
+                <div className="text-xs font-bold flex justify-between items-center bg-white p-2 rounded-lg border border-slate-100">
+                  <span className="text-slate-500">TOTAL BOBOT:</span>
+                  <span className={Math.abs(totalWeight - 1.0) < 0.01 ? "text-emerald-600 font-black" : "text-rose-600 font-black"}>
+                    {(totalWeight * 100).toFixed(0)}% / 100%
+                  </span>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Status</label>

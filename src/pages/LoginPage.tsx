@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
-import { doc, getDoc, setDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, User, LogIn, Chrome, Mail, Lock, UserPlus, KeyRound, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -51,7 +51,8 @@ export default function LoginPage() {
             role: role,
             photoURL: user.photoURL,
             status: 'active',
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString()
           });
         } else {
           const userData = docSnap.data();
@@ -61,6 +62,7 @@ export default function LoginPage() {
             setLoading(false);
             return;
           }
+          await updateDoc(docRef, { lastLogin: new Date().toISOString() });
         }
 
         navigate('/dashboard');
@@ -101,7 +103,8 @@ export default function LoginPage() {
         const result = await signInWithEmailAndPassword(auth, email, password);
         const user = result.user;
         
-        const docSnap = await getDoc(doc(db, 'users', user.uid));
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const userData = docSnap.data();
           if (userData.status === 'inactive') {
@@ -110,6 +113,7 @@ export default function LoginPage() {
             setLoading(false);
             return;
           }
+          await updateDoc(docRef, { lastLogin: new Date().toISOString() });
         }
       } else {
         const result = await createUserWithEmailAndPassword(auth, email, password);

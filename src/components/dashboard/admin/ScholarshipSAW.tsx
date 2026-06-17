@@ -33,10 +33,16 @@ interface Application {
   scholarshipName: string;
   status: string;
   criteriaValues: {
-    gpa: number;
-    parentIncomeValue: number;
-    dependents: number;
-    achievements: number;
+    nilaiAkademik?: number;
+    nilaiHafalan?: number;
+    nilaiPerilaku?: number;
+    nilaiPresensi?: number;
+    nilaiPenghasilan?: number;
+    nilaiTanggungan?: number;
+    gpa?: number;
+    parentIncomeValue?: number;
+    dependents?: number;
+    achievements?: number;
   };
 }
 
@@ -81,15 +87,6 @@ export default function ScholarshipSAW() {
           });
         });
         setStudentsMap(map);
-
-        // Use fixed dedicated scholarship criteria mapping
-        const critData: Criterion[] = [
-            { id: 'gpa', name: 'IPK / Rata-rata', weight: 0.4, type: 'benefit' },
-            { id: 'income', name: 'Penghasilan', weight: 0.3, type: 'cost' },
-            { id: 'dependents', name: 'Tanggungan', weight: 0.2, type: 'benefit' },
-            { id: 'achievements', name: 'Prestasi', weight: 0.1, type: 'benefit' }
-        ];
-        setCriteria(critData);
       } catch (e) {
         console.error(e);
       } finally {
@@ -122,6 +119,69 @@ export default function ScholarshipSAW() {
     return () => unsubscribe();
   }, [selectedScholarshipId]);
 
+  useEffect(() => {
+    if (!selectedScholarshipId) return;
+
+    const fetchSelectedScholarshipCriteria = async () => {
+      try {
+        const docRef = doc(db, 'scholarships', selectedScholarshipId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const s = docSnap.data();
+          // Load custom dynamic criteria weights configured by the admin
+          const wAcademic = s.weightAcademic !== undefined ? Number(s.weightAcademic) : 0.2;
+          const wHafalan = s.weightHafalan !== undefined ? Number(s.weightHafalan) : 0.2;
+          const wPerilaku = s.weightPerilaku !== undefined ? Number(s.weightPerilaku) : 0.15;
+          const wPresensi = s.weightPresensi !== undefined ? Number(s.weightPresensi) : 0.15;
+          const wPenghasilan = s.weightPenghasilan !== undefined ? Number(s.weightPenghasilan) : 0.15;
+          const wTanggungan = s.weightTanggungan !== undefined ? Number(s.weightTanggungan) : 0.15;
+          
+          setCriteria([
+            { id: 'nilaiAkademik', name: 'Nilai Akademik', weight: wAcademic, type: 'benefit' },
+            { id: 'nilaiHafalan', name: 'Nilai Hafalan/Tahfidz', weight: wHafalan, type: 'benefit' },
+            { id: 'nilaiPerilaku', name: 'Nilai Perilaku', weight: wPerilaku, type: 'benefit' },
+            { id: 'nilaiPresensi', name: 'Nilai Presensi', weight: wPresensi, type: 'benefit' },
+            { id: 'nilaiPenghasilan', name: 'Penghasilan Orang Tua', weight: wPenghasilan, type: 'cost' },
+            { id: 'nilaiTanggungan', name: 'Jumlah Tanggungan', weight: wTanggungan, type: 'benefit' }
+          ]);
+        } else {
+          // Default fallbacks
+          setCriteria([
+            { id: 'nilaiAkademik', name: 'Nilai Akademik', weight: 0.2, type: 'benefit' },
+            { id: 'nilaiHafalan', name: 'Nilai Hafalan/Tahfidz', weight: 0.2, type: 'benefit' },
+            { id: 'nilaiPerilaku', name: 'Nilai Perilaku', weight: 0.15, type: 'benefit' },
+            { id: 'nilaiPresensi', name: 'Nilai Presensi', weight: 0.15, type: 'benefit' },
+            { id: 'nilaiPenghasilan', name: 'Penghasilan Orang Tua', weight: 0.15, type: 'cost' },
+            { id: 'nilaiTanggungan', name: 'Jumlah Tanggungan', weight: 0.15, type: 'benefit' }
+          ]);
+        }
+      } catch (e) {
+        console.error("Error fetching scholarship criteria:", e);
+      }
+    };
+
+    fetchSelectedScholarshipCriteria();
+  }, [selectedScholarshipId]);
+
+  const getAppCriteriaValue = (app: Application, critId: string): number => {
+    const cv = app.criteriaValues || {};
+    
+    // Match by critId string directly first
+    if (cv[critId as keyof typeof cv] !== undefined) {
+      return Number(cv[critId as keyof typeof cv]);
+    }
+
+    // Safe fallbacks for legacy fields
+    if (critId === 'nilaiAkademik') return Number(cv.nilaiAkademik ?? (cv.gpa ? cv.gpa * 10 : 0) ?? 0);
+    if (critId === 'nilaiHafalan') return Number(cv.nilaiHafalan ?? (cv.achievements ? cv.achievements * 20 : 0) ?? 0);
+    if (critId === 'nilaiPerilaku') return Number(cv.nilaiPerilaku ?? 80);
+    if (critId === 'nilaiPresensi') return Number(cv.nilaiPresensi ?? 90);
+    if (critId === 'nilaiPenghasilan') return Number(cv.nilaiPenghasilan ?? (cv.parentIncomeValue ? cv.parentIncomeValue * 20 : 50) ?? 50);
+    if (critId === 'nilaiTanggungan') return Number(cv.nilaiTanggungan ?? (cv.dependents ? cv.dependents * 20 : 50) ?? 50);
+
+    return 0;
+  };
+
   const executeSAW = () => {
     if (applications.length === 0) {
         alert("Tidak ada pendaftar untuk program ini.");
@@ -129,28 +189,12 @@ export default function ScholarshipSAW() {
     }
     setCalculating(true);
     
-    // Mapping from application data to criteria
-    // We assume the criteria IDs match the keys in criteriaValues: 
-    // gpa -> gpa
-    // income -> parentIncomeValue
-    // dependents -> dependents
-    // achievements -> achievements
-
-    const getAppCriteriaValue = (app: Application, critId: string): number => {
-        const cv = app.criteriaValues || { gpa: 0, parentIncomeValue: 5, dependents: 0, achievements: 1 };
-        if (critId.toLowerCase().includes('gpa') || critId === 'gpa') return cv.gpa;
-        if (critId.toLowerCase().includes('income') || critId === 'income') return cv.parentIncomeValue;
-        if (critId.toLowerCase().includes('dependent') || critId === 'dependents') return cv.dependents;
-        if (critId.toLowerCase().includes('achievement') || critId === 'achievements') return cv.achievements;
-        return 0;
-    };
-
-    // 1. Find Max/Min for each criteria
+    // 1. Find Max / Min for each dynamic criterion
     const limits: { [key: string]: { max: number; min: number } } = {};
     criteria.forEach(c => {
       const values = applications.map(a => getAppCriteriaValue(a, c.id));
       limits[c.id] = {
-        max: Math.max(...values, 0.0001), 
+        max: Math.max(...values, 1), 
         min: values.filter(v => v > 0).length > 0 ? Math.min(...values.filter(v => v > 0)) : 1 
       };
     });
@@ -161,21 +205,22 @@ export default function ScholarshipSAW() {
       normMatrix[app.id] = {};
       criteria.forEach(c => {
         const val = getAppCriteriaValue(app, c.id);
-        const isBenefit = c.type === 'benefit' || !c.type;
+        const isBenefit = c.type === 'benefit';
         if (isBenefit) {
-          normMatrix[app.id][c.id] = val / limits[c.id].max;
+          normMatrix[app.id][c.id] = val / (limits[c.id].max || 1);
         } else {
-          normMatrix[app.id][c.id] = limits[c.id].min / Math.max(val, 0.0001);
+          // Cost logic (smaller value is better)
+          normMatrix[app.id][c.id] = (limits[c.id].min || 1) / Math.max(val, 1);
         }
       });
     });
     setNormalizationMatrix(normMatrix);
 
-    // 3. Final Score
+    // 3. Calculate Final Scores with output in 0-100 range
     const results = applications.map(app => {
-      let total = 0;
+      let totalSum = 0;
       criteria.forEach(c => {
-        total += (normMatrix[app.id][c.id] || 0) * c.weight;
+        totalSum += (normMatrix[app.id][c.id] || 0) * c.weight;
       });
       const studentInfo = studentsMap.get(app.studentId);
       const name = studentInfo ? studentInfo.fullName : app.studentName;
@@ -185,9 +230,20 @@ export default function ScholarshipSAW() {
         studentId: app.studentId,
         name: name,
         class: clsName,
-        score: total
+        score: totalSum // 0.0 to 1.0 representation
       };
     }).sort((a, b) => b.score - a.score);
+
+    // Persist scores in Firestore for students profile visibility
+    results.forEach(async (res) => {
+      try {
+        await setDoc(doc(db, 'scholarship_applications', res.appId), {
+          sawScore: Math.round(res.score * 100)
+        }, { merge: true });
+      } catch (err) {
+        console.error("Error updating application SAW score:", err);
+      }
+    });
 
     setFinalScores(results);
     setCalculating(false);
@@ -301,7 +357,7 @@ export default function ScholarshipSAW() {
             </div>
             <div>
               <h2 className="font-black text-slate-900">Alternatif Calon Penerima (X)</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Matriks nilai dari formulir pendaftaran</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Matriks nilai dari formulir pendaftaran (Skala 0-100)</p>
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -309,10 +365,11 @@ export default function ScholarshipSAW() {
               <thead>
                 <tr className="bg-slate-50/50">
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Nama Lengkap</th>
-                  <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">GPA</th>
-                  <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Income</th>
-                  <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Dep</th>
-                  <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Ach</th>
+                  {criteria.map(c => (
+                    <th key={c.id} className="px-4 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                      {c.name}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -326,10 +383,11 @@ export default function ScholarshipSAW() {
                         <p className="text-sm font-bold text-slate-900">{displayName}</p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kelas {displayClass}</p>
                       </td>
-                      <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.gpa || 0}</td>
-                      <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.parentIncomeValue || 5}</td>
-                      <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.dependents || 0}</td>
-                      <td className="px-8 py-5 text-center font-black text-slate-700 text-sm">{app.criteriaValues?.achievements || 1}</td>
+                      {criteria.map(c => (
+                        <td key={c.id} className="px-4 py-5 text-center font-black text-slate-700 text-sm">
+                          {getAppCriteriaValue(app, c.id)}
+                        </td>
+                      ))}
                     </tr>
                   );
                 })}
@@ -355,7 +413,7 @@ export default function ScholarshipSAW() {
                 </button>
               </div>
               <p className="text-emerald-100/80 text-sm font-medium leading-relaxed max-w-2xl relative z-10">
-                Nilai IPK, Tanggungan, dan Prestasi bersifat <span className="text-white font-black">Benefit</span>, sedangkan Penghasilan bersifat <span className="text-white font-black">Cost</span>.
+                Kriteria benefit dihitung dengan pembagian nilai elemen terhadap nilai maksimal, sedangkan kriteria cost dihitung dengan pembagian nilai minimal elemen terhadap nilai elemen tersebut.
               </p>
            </div>
 
@@ -364,11 +422,12 @@ export default function ScholarshipSAW() {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-slate-50/50">
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Alternatif</th>
-                      <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">R: GPA</th>
-                      <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">R: Income</th>
-                      <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">R: Dep</th>
-                      <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">R: Ach</th>
+                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Alternatif</th>
+                      {criteria.map(c => (
+                        <th key={c.id} className="px-4 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                          R: {c.name}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -377,10 +436,11 @@ export default function ScholarshipSAW() {
                         <td className="px-8 py-5">
                           <p className="text-sm font-bold text-slate-900">{studentsMap.get(app.studentId)?.fullName || app.studentName}</p>
                         </td>
-                        <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['gpa'] || 0).toFixed(3)}</td>
-                        <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['income'] || normalizationMatrix[app.id]?.['parentIncomeValue'] || 0).toFixed(3)}</td>
-                        <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['dependents'] || 0).toFixed(3)}</td>
-                        <td className="px-8 py-5 text-center font-black text-emerald-600 text-sm">{(normalizationMatrix[app.id]?.['achievements'] || 0).toFixed(3)}</td>
+                        {criteria.map(c => (
+                          <td key={c.id} className="px-4 py-5 text-center font-black text-emerald-600 text-sm">
+                            {(normalizationMatrix[app.id]?.[c.id] || 0).toFixed(3)}
+                          </td>
+                        ))}
                       </tr>
                     ))}
                   </tbody>

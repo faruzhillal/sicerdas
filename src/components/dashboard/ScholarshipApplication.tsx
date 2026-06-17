@@ -31,9 +31,12 @@ export default function ScholarshipApplication() {
     parentIncome: '',
     notes: '',
     criteriaValues: {
-      gpa: 0,
-      dependents: 0,
-      achievements: 1 // 1: Cukup, 2: Baik, 3: Sangat Baik, 4: Prestasi Kota, 5: Prestasi Nasional
+      nilaiAkademik: 0,
+      nilaiHafalan: 0,
+      nilaiPerilaku: 0,
+      nilaiPresensi: 0,
+      nilaiPenghasilan: 50,
+      nilaiTanggungan: 50
     },
     declaration: false
   });
@@ -83,27 +86,35 @@ export default function ScholarshipApplication() {
           setApplicationMessage("Anda telah mencapai batas maksimal pengajuan (3 kali). Hubungi admin jika merasa ada kesalahan.");
         }
 
-        // Fetch dynamic GPA average
+        // Fetch dynamic school grades
         const scoresDoc = await getDoc(doc(db, 'criteria_scores', currentUser.uid));
-        if (scoresDoc.exists()) {
-          const scoresData = scoresDoc.data();
-          let total = 0;
-          let cnt = 0;
-          Object.keys(scoresData).forEach(k => {
-            if (typeof scoresData[k] === 'number') {
-              total += scoresData[k];
-              cnt++;
-            }
-          });
-          const average = cnt > 0 ? parseFloat((total / cnt).toFixed(2)) : 0;
-          setFormData(prev => ({
-            ...prev,
-            criteriaValues: {
-              ...prev.criteriaValues,
-              gpa: average
-            }
-          }));
+        const scoresData = scoresDoc.exists() ? scoresDoc.data() : {};
+        
+        // Auto-detect other fields from profile/demographics
+        const dependentsCount = Number((profile as any)?.dependents) || 0;
+        const mappedTanggungan = Math.min(100, Math.max(0, dependentsCount * 20 || 50));
+
+        let mappedIncomeValue = 50;
+        if ((profile as any)?.parentIncome) {
+          if ((profile as any).parentIncome === INCOME_RANGES[0]) mappedIncomeValue = 20;
+          else if ((profile as any).parentIncome === INCOME_RANGES[1]) mappedIncomeValue = 40;
+          else if ((profile as any).parentIncome === INCOME_RANGES[2]) mappedIncomeValue = 60;
+          else if ((profile as any).parentIncome === INCOME_RANGES[3]) mappedIncomeValue = 80;
+          else if ((profile as any).parentIncome === INCOME_RANGES[4]) mappedIncomeValue = 100;
         }
+
+        setFormData(prev => ({
+          ...prev,
+          criteriaValues: {
+            nilaiAkademik: Math.round(Number(scoresData.academic) || (scoresData.gpa ? scoresData.gpa * 10 : 80)),
+            nilaiHafalan: Math.round(Number(scoresData.tahfidz || scoresData.hafalan) || 75),
+            nilaiPerilaku: Math.round(Number(scoresData.behavior) || 85),
+            nilaiPresensi: Math.round(Number(scoresData.attendance) || 90),
+            nilaiPenghasilan: mappedIncomeValue,
+            nilaiTanggungan: mappedTanggungan
+          }
+        }));
+
       } catch (error) {
         console.error("Error checking application:", error);
       } finally {
@@ -112,7 +123,19 @@ export default function ScholarshipApplication() {
     };
 
     checkApplication();
-  }, [id, currentUser]);
+  }, [id, currentUser, profile]);
+
+  useEffect(() => {
+    if (profile) {
+      setFormData(prev => ({
+        ...prev,
+        nisn: prev.nisn || (profile as any).nisn || '',
+        parentName: prev.parentName || (profile as any).parentName || '',
+        parentJob: prev.parentJob || (profile as any).parentJob || '',
+        parentIncome: prev.parentIncome || (profile as any).parentIncome || '',
+      }));
+    }
+  }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,14 +144,6 @@ export default function ScholarshipApplication() {
       alert("Anda harus menyetujui pernyataan kebenaran data.");
       return;
     }
-
-    // Map parent income to numeric value (1-5) for Cost logic
-    // < 1m: 1, 1-2.5: 2, 2.5-5: 3, 5-7.5: 4, > 7.5: 5
-    let incomeValue = 1;
-    if (formData.parentIncome === INCOME_RANGES[1]) incomeValue = 2;
-    else if (formData.parentIncome === INCOME_RANGES[2]) incomeValue = 3;
-    else if (formData.parentIncome === INCOME_RANGES[3]) incomeValue = 4;
-    else if (formData.parentIncome === INCOME_RANGES[4]) incomeValue = 5;
 
     try {
       setSubmitting(true);
@@ -144,8 +159,12 @@ export default function ScholarshipApplication() {
         attempt: attemptNum,
         ...formData,
         criteriaValues: {
-          ...formData.criteriaValues,
-          parentIncomeValue: incomeValue
+          nilaiAkademik: Math.round(Number(formData.criteriaValues.nilaiAkademik) || 0),
+          nilaiHafalan: Math.round(Number(formData.criteriaValues.nilaiHafalan) || 0),
+          nilaiPerilaku: Math.round(Number(formData.criteriaValues.nilaiPerilaku) || 0),
+          nilaiPresensi: Math.round(Number(formData.criteriaValues.nilaiPresensi) || 0),
+          nilaiPenghasilan: Math.round(Number(formData.criteriaValues.nilaiPenghasilan) || 50),
+          nilaiTanggungan: Math.round(Number(formData.criteriaValues.nilaiTanggungan) || 50)
         },
         status: 'pending',
         submittedAt: new Date().toISOString()
@@ -329,62 +348,119 @@ export default function ScholarshipApplication() {
           <section className="space-y-6">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">C</div>
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Kriteria Beasiswa (Data SPK)</h2>
+              <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Kriteria Kelayakan Beasiswa (Skor 0 - 100)</h2>
             </div>
             
-            <div className="grid sm:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">GPA / Nilai Rata-rata *</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Nilai Akademik (0-100)</label>
                 <input 
                   type="number" 
-                  step="0.01"
                   min="0"
                   max="100"
                   required
-                  placeholder="Contoh: 85.50 atau 3.75"
-                  value={formData.criteriaValues.gpa}
+                  placeholder="Nilai Akademik"
+                  value={formData.criteriaValues.nilaiAkademik}
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    criteriaValues: { ...formData.criteriaValues, gpa: parseFloat(e.target.value) || 0 } 
+                    criteriaValues: { ...formData.criteriaValues, nilaiAkademik: Math.round(Number(e.target.value)) || 0 } 
                   })}
                   className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                 />
+                <span className="text-[10px] text-slate-400 block">Prefill otomatis / diisi oleh Sekolah</span>
               </div>
+
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Jumlah Tanggungan *</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Nilai Hafalan Quran (0-100)</label>
                 <input 
                   type="number" 
                   min="0"
+                  max="100"
                   required
-                  placeholder="Jumlah saudara/tanggungan"
-                  value={formData.criteriaValues.dependents}
+                  placeholder="Nilai Hafalan/Tahfidz"
+                  value={formData.criteriaValues.nilaiHafalan}
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    criteriaValues: { ...formData.criteriaValues, dependents: parseInt(e.target.value) || 0 } 
+                    criteriaValues: { ...formData.criteriaValues, nilaiHafalan: Math.round(Number(e.target.value)) || 0 } 
                   })}
                   className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                 />
+                <span className="text-[10px] text-slate-400 block">Diutamakan untuk Beasiswa Hafalan</span>
               </div>
+
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Tingkat Prestasi *</label>
-                <select 
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Nilai Perilaku & Akhlak (0-100)</label>
+                <input 
+                  type="number" 
+                  min="0"
+                  max="100"
                   required
-                  value={formData.criteriaValues.achievements}
+                  placeholder="Nilai Sikap/Perilaku"
+                  value={formData.criteriaValues.nilaiPerilaku}
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    criteriaValues: { ...formData.criteriaValues, achievements: parseInt(e.target.value) || 1 } 
+                    criteriaValues: { ...formData.criteriaValues, nilaiPerilaku: Math.round(Number(e.target.value)) || 0 } 
                   })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all bg-white"
-                >
-                  <option value={1}>Cukup (Hanya Akademik)</option>
-                  <option value={2}>Baik (Ex-school/Organisasi)</option>
-                  <option value={3}>Sangat Baik (Juara Sekolah/Kecamatan)</option>
-                  <option value={4}>Prestasi Tingkat Kota/Provinsi</option>
-                  <option value={5}>Prestasi Tingkat Nasional/Intl</option>
-                </select>
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
+                />
+                <span className="text-[10px] text-slate-400 block">Berdasarkan kedisplinan kelas</span>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Nilai Kehadiran / Presensi (0-100)</label>
+                <input 
+                  type="number" 
+                  min="0"
+                  max="100"
+                  required
+                  placeholder="Persentase Keaktifan"
+                  value={formData.criteriaValues.nilaiPresensi}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    criteriaValues: { ...formData.criteriaValues, nilaiPresensi: Math.round(Number(e.target.value)) || 0 } 
+                  })}
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
+                />
+                <span className="text-[10px] text-slate-400 block">Sesuai absensi sekolah harian</span>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Skor Ekonomi Keluarga (0-100)</label>
+                <input 
+                  type="number" 
+                  min="0"
+                  max="100"
+                  required
+                  placeholder="Kondisi Finansial (Sifat Cost)"
+                  value={formData.criteriaValues.nilaiPenghasilan}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    criteriaValues: { ...formData.criteriaValues, nilaiPenghasilan: Math.round(Number(e.target.value)) || 0 } 
+                  })}
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
+                />
+                <span className="text-[10px] text-slate-400 block">Semakin tinggi = semakin mampu (Cost)</span>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Skor Tanggungan Siswa (0-100)</label>
+                <input 
+                  type="number" 
+                  min="0"
+                  max="100"
+                  required
+                  placeholder="Beban Tanggungan"
+                  value={formData.criteriaValues.nilaiTanggungan}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    criteriaValues: { ...formData.criteriaValues, nilaiTanggungan: Math.round(Number(e.target.value)) || 0 } 
+                  })}
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
+                />
+                <span className="text-[10px] text-slate-400 block">Banyaknya saudara/tanggungan keluarga</span>
               </div>
             </div>
-            <p className="text-[10px] text-slate-400 italic">Data ini akan diakumulasi menggunakan algoritma SPK untuk menentukan peringkat kelayakan Anda secara objektif.</p>
+            <p className="text-[10px] text-slate-400 italic">Data ini dikonversi penuh ke skala 1-100 tanpa desimal sesuai arahan SPK beasiswa untuk penentuan prioritas ranking menggunakan metode SAW.</p>
           </section>
 
           {/* SECTION D: KELENGKAPAN BERKAS */}

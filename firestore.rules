@@ -16,11 +16,13 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.email.lower() == 'faruzhillal465@gmail.com' ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'none') == 'admin')
-      );
+      return isSignedIn() && 
+             request.auth.token != null && 
+             'email' in request.auth.token && (
+               request.auth.token.email.lower() == 'faruzhillal465@gmail.com' ||
+               (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+                get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'none') == 'admin')
+             );
     }
 
     function isValidId(id) {
@@ -56,7 +58,7 @@ service cloud.firestore {
     match /scholarship_applications/{appId} {
       allow read: if isAdmin() || 
                     (isSignedIn() && (resource.data.studentId == request.auth.uid)) ||
-                    (resource.data.status == 'approved');
+                    (resource.data.get('status', 'none') == 'approved');
       allow create: if isSignedIn() && request.resource.data.studentId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
@@ -83,7 +85,7 @@ service cloud.firestore {
 
     // 8. Classes
     match /classes/{classId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 

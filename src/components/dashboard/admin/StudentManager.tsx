@@ -8,9 +8,21 @@ import { cn } from '../../../lib/utils';
 interface Student {
   uid: string;
   fullName: string;
-  studentId: string;
+  studentId: string; // NIS
+  nisn?: string;     // NISN
+  gender?: string;   // Jenis Kelamin
+  religion?: string; // Agama
+  semester?: string; // Semester
+  status?: string;   // Status Siswa ('Aktif', 'Lulus', 'Non-Aktif', 'Pindah')
   email: string;
   class: string;
+  address?: string;
+  phone?: string;
+  birthPlace?: string;
+  birthDate?: string;
+  parentName?: string;
+  parentJob?: string;
+  parentIncome?: string;
   role: 'student';
 }
 
@@ -27,8 +39,20 @@ export default function StudentManager() {
   const [formData, setFormData] = useState<Omit<Student, 'uid'>>({
     fullName: '',
     studentId: '',
+    nisn: '',
+    gender: 'Laki-laki',
+    religion: 'Islam',
+    semester: '1',
+    status: 'Aktif',
     email: '',
     class: '',
+    address: '',
+    phone: '',
+    birthPlace: '',
+    birthDate: '',
+    parentName: '',
+    parentJob: '',
+    parentIncome: '',
     role: 'student'
   });
 
@@ -76,7 +100,25 @@ export default function StudentManager() {
       }
       setShowForm(false);
       setEditingId(null);
-      setFormData({ fullName: '', studentId: '', email: '', class: classes[0] || '', role: 'student' });
+      setFormData({
+        fullName: '',
+        studentId: '',
+        nisn: '',
+        gender: 'Laki-laki',
+        religion: 'Islam',
+        semester: '1',
+        status: 'Aktif',
+        email: '',
+        class: classes[0] || '',
+        address: '',
+        phone: '',
+        birthPlace: '',
+        birthDate: '',
+        parentName: '',
+        parentJob: '',
+        parentIncome: '',
+        role: 'student'
+      });
     } catch (error) {
       handleFirestoreError(error, editingId ? OperationType.UPDATE : OperationType.CREATE, 'users');
     } finally {
@@ -98,6 +140,7 @@ export default function StudentManager() {
     const matchesSearch = 
       (s.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
       (s.studentId || '').includes(searchTerm) || 
+      (s.nisn || '').includes(searchTerm) ||
       (s.email || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesClass = selectedClassFilter === 'Semua Kelas' || s.class === selectedClassFilter;
     return matchesSearch && matchesClass;
@@ -113,7 +156,25 @@ export default function StudentManager() {
         <button 
           onClick={() => {
             setEditingId(null);
-            setFormData({ fullName: '', studentId: '', email: '', class: classes[0] || '', role: 'student' });
+            setFormData({
+              fullName: '',
+              studentId: '',
+              nisn: '',
+              gender: 'Laki-laki',
+              religion: 'Islam',
+              semester: '1',
+              status: 'Aktif',
+              email: '',
+              class: classes[0] || '',
+              address: '',
+              phone: '',
+              birthPlace: '',
+              birthDate: '',
+              parentName: '',
+              parentJob: '',
+              parentIncome: '',
+              role: 'student'
+            });
             setShowForm(true);
           }}
           className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
@@ -125,14 +186,14 @@ export default function StudentManager() {
 
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-8 shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-6 shrink-0">
               <h2 className="text-xl font-bold text-slate-900">{editingId ? 'Edit Siswa' : 'Tambah Siswa Baru'}</h2>
               <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600">
                 <X size={24} />
               </button>
             </div>
-            <form onSubmit={handleSave} className="space-y-4">
+            <form onSubmit={handleSave} className="space-y-4 overflow-y-auto pr-2 flex-1 custom-scrollbar">
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Nama Lengkap</label>
                 <input 
@@ -155,11 +216,23 @@ export default function StudentManager() {
                   />
                 </div>
                 <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">NISN</label>
+                  <input 
+                    type="text" 
+                    value={formData.nisn || ''}
+                    onChange={e => setFormData({ ...formData, nisn: e.target.value })}
+                    placeholder="Nomor Induk Siswa Nasional"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Kelas</label>
                   <select 
                     value={formData.class}
                     onChange={e => setFormData({ ...formData, class: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                   >
                     {classes.length > 0 ? (
                       classes.map(c => <option key={c} value={c}>{c}</option>)
@@ -168,21 +241,163 @@ export default function StudentManager() {
                     )}
                   </select>
                 </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Semester</label>
+                  <select 
+                    value={formData.semester || '1'}
+                    onChange={e => setFormData({ ...formData, semester: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm"
+                  >
+                    <option value="1">1 (Satu)</option>
+                    <option value="2">2 (Dua)</option>
+                    <option value="3">3 (Tiga)</option>
+                    <option value="4">4 (Empat)</option>
+                    <option value="5">5 (Lima)</option>
+                    <option value="6">6 (Enam)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Status</label>
+                  <select 
+                    value={formData.status || 'Aktif'}
+                    onChange={e => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm"
+                  >
+                    <option value="Aktif">Aktif</option>
+                    <option value="Lulus">Lulus</option>
+                    <option value="Non-Aktif">Non-Aktif</option>
+                    <option value="Pindah">Pindah</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Jenis Kelamin</label>
+                  <select 
+                    value={formData.gender || 'Laki-laki'}
+                    onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm"
+                  >
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Agama</label>
+                  <select 
+                    value={formData.religion || 'Islam'}
+                    onChange={e => setFormData({ ...formData, religion: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm"
+                  >
+                    <option value="Islam">Islam</option>
+                    <option value="Kristen">Kristen</option>
+                    <option value="Katolik">Katolik</option>
+                    <option value="Hindu">Hindu</option>
+                    <option value="Buddha">Buddha</option>
+                    <option value="Khonghucu">Khonghucu</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Tempat Lahir</label>
+                  <input 
+                    type="text" 
+                    value={formData.birthPlace}
+                    onChange={e => setFormData({ ...formData, birthPlace: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Contoh: Jakarta"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Tanggal Lahir</label>
+                  <input 
+                    type="date" 
+                    value={formData.birthDate}
+                    onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Nomor Telepon</label>
+                  <input 
+                    type="text" 
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="0812xxx"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Email</label>
+                  <input 
+                    required
+                    type="email" 
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Email</label>
-                <input 
-                  required
-                  type="email" 
-                  value={formData.email}
-                  onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Alamat Lengkap</label>
+                <textarea 
+                  rows={2}
+                  value={formData.address}
+                  onChange={e => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Alamat domisili..."
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
                 />
               </div>
+
+              <div className="border-t border-slate-100 pt-4 space-y-4">
+                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Data Orang Tua / Wali</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Nama Orang Tua / Wali</label>
+                    <input 
+                      type="text" 
+                      value={formData.parentName || ''}
+                      onChange={e => setFormData({ ...formData, parentName: e.target.value })}
+                      placeholder="Nama ayah/ibu/wali..."
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Pekerjaan Orang Tua</label>
+                    <input 
+                      type="text" 
+                      value={formData.parentJob || ''}
+                      onChange={e => setFormData({ ...formData, parentJob: e.target.value })}
+                      placeholder="PNS, Karyawan, TNI, dll."
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Estimasi Gaji Bulanan</label>
+                  <select 
+                    value={formData.parentIncome || ''}
+                    onChange={e => setFormData({ ...formData, parentIncome: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm font-medium"
+                  >
+                    <option value="">Pilih Range Gaji</option>
+                    <option value="< Rp 1.000.000">{'< Rp 1.000.000'}</option>
+                    <option value="Rp 1.000.000 - Rp 2.500.000">Rp 1.000.000 - Rp 2.500.000</option>
+                    <option value="Rp 2.500.000 - Rp 5.000.000">Rp 2.500.000 - Rp 5.000.000</option>
+                    <option value="Rp 5.000.000 - Rp 7.500.000">Rp 5.000.000 - Rp 7.500.000</option>
+                    <option value="> Rp 7.500.000">{'> Rp 7.500.000'}</option>
+                  </select>
+                </div>
+              </div>
+
               <button 
                 type="submit" 
                 disabled={saving || classes.length === 0}
-                className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold hover:bg-slate-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold hover:bg-slate-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
               >
                 {saving && <Loader2 size={18} className="animate-spin" />}
                 {editingId ? 'Simpan Perubahan' : 'Tambah Siswa'}
@@ -226,36 +441,75 @@ export default function StudentManager() {
               <tr className="bg-slate-50/50 border-b border-slate-100">
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profil Siswa</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kelas</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat & Nomor Telepon</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tempat/Tgl Lahir</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Orang Tua / Wali</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {loading ? (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400">Memuat data siswa...</td></tr>
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-slate-400">Memuat data siswa...</td></tr>
               ) : filteredStudents.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400">Tidak ada data siswa.</td></tr>
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-slate-400">Tidak ada data siswa.</td></tr>
               ) : filteredStudents.map((s) => (
                 <tr key={s.uid} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500">
+                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500 shrink-0">
                         {s.fullName?.charAt(0)}
                       </div>
                       <div>
                         <p className="font-bold text-slate-900">{s.fullName}</p>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">NIS: {s.studentId}</p>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          <span className="text-[10px] text-slate-600 font-semibold bg-slate-100 px-1.5 py-0.5 rounded">
+                            NIS: {s.studentId || '-'}
+                          </span>
+                          <span className="text-[10px] text-slate-600 font-semibold bg-slate-100 px-1.5 py-0.5 rounded">
+                            NISN: {s.nisn || '-'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-bold text-slate-600">{s.class}</td>
-                  <td className="px-6 py-4 text-slate-500">{s.email}</td>
                   <td className="px-6 py-4">
-                    <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded text-[10px] font-bold uppercase tracking-widest border border-emerald-100">
-                      Aktif
+                    <span className="font-bold text-slate-600 block mb-1">
+                      Kelas {s.class || '-'} <span className="text-[10px] text-slate-400 font-normal">(Sem. {s.semester || '1'})</span>
+                    </span>
+                    <span className={cn(
+                      "inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border",
+                      (s.status || 'Aktif') === 'Aktif' && "bg-emerald-50 text-emerald-600 border-emerald-100",
+                      s.status === 'Lulus' && "bg-blue-50 text-blue-600 border-blue-100",
+                      s.status === 'Pindah' && "bg-amber-50 text-amber-600 border-amber-100",
+                      s.status === 'Non-Aktif' && "bg-rose-50 text-rose-600 border-rose-100"
+                    )}>
+                      {s.status || 'Aktif'}
                     </span>
                   </td>
+                  <td className="px-6 py-4 text-xs font-semibold text-slate-700">
+                    <p className="line-clamp-1 max-w-[150px]" title={s.address}>{s.address || '-'}</p>
+                    <p className="text-[10px] text-slate-500">{s.phone || '-'}</p>
+                  </td>
+                  <td className="px-6 py-4 text-xs font-semibold text-slate-700">
+                    <p>{s.birthPlace || '-'}</p>
+                    <p className="text-[10px] text-slate-500">{s.birthDate || '-'}</p>
+                    <div className="flex gap-1.5 mt-1 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                      <span>{s.gender || 'Laki-laki'}</span>
+                      <span>•</span>
+                      <span>{s.religion || 'Islam'}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-xs font-semibold text-slate-700">
+                    <p className="font-bold text-slate-900">{s.parentName || '-'}</p>
+                    <p className="text-[10px] text-slate-500">{s.parentJob || '-'}</p>
+                    {s.parentIncome && (
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-50 text-[10px] text-emerald-700 font-bold border border-emerald-100">
+                        {s.parentIncome}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-xs text-slate-500">{s.email}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-1">
                       <button 
@@ -264,8 +518,20 @@ export default function StudentManager() {
                           setFormData({ 
                             fullName: s.fullName || '', 
                             studentId: s.studentId || '', 
+                            nisn: s.nisn || '',
+                            gender: s.gender || 'Laki-laki',
+                            religion: s.religion || 'Islam',
+                            semester: s.semester || '1',
+                            status: s.status || 'Aktif',
                             email: s.email || '', 
-                            class: s.class || '1A', 
+                            class: s.class || '', 
+                            address: s.address || '',
+                            phone: s.phone || '',
+                            birthPlace: s.birthPlace || '',
+                            birthDate: s.birthDate || '',
+                            parentName: s.parentName || '',
+                            parentJob: s.parentJob || '',
+                            parentIncome: s.parentIncome || '',
                             role: 'student' 
                           });
                           setShowForm(true);

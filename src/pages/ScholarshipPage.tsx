@@ -84,21 +84,32 @@ export default function ScholarshipPage() {
     const fetchRecipients = async () => {
       setLoadingRecipients(true);
       try {
-        // Fetch current students from users for real-time class maps
-        const studentsSnapshot = await getDocs(query(collection(db, 'users'), where('role', '==', 'student')));
         const studentsMapped = new Map<string, { fullName: string; class: string }>();
-        studentsSnapshot.docs.forEach(doc => {
-          const data = doc.data();
-          studentsMapped.set(doc.id, {
-            fullName: data.fullName || 'Siswa',
-            class: data.class || ''
+        try {
+          // Fetch current students from users for real-time class maps
+          const studentsSnapshot = await getDocs(query(collection(db, 'users'), where('role', '==', 'student')));
+          studentsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            studentsMapped.set(doc.id, {
+              fullName: data.fullName || 'Siswa',
+              class: data.class || ''
+            });
           });
-        });
+        } catch (studentsErr) {
+          console.warn("Could not fetch user mappings for scholarship recipients:", studentsErr);
+        }
 
-        // Fetch registered classes in the database
-        const classesSnapshot = await getDocs(query(collection(db, 'classes'), orderBy('name', 'asc')));
-        const dbClasses = classesSnapshot.docs.map(doc => doc.data().name as string);
-        const classesList = dbClasses.length > 0 ? dbClasses : ['1A', '1B', '2A', '2B', '3A', '3B'];
+        let classesList = ['1A', '1B', '2A', '2B', '3A', '3B'];
+        try {
+          // Fetch registered classes in the database
+          const classesSnapshot = await getDocs(query(collection(db, 'classes'), orderBy('name', 'asc')));
+          const dbClasses = classesSnapshot.docs.map(doc => doc.data().name as string);
+          if (dbClasses.length > 0) {
+            classesList = dbClasses;
+          }
+        } catch (classesErr) {
+          console.warn("Could not fetch classes from DB:", classesErr);
+        }
 
         const q = query(
           collection(db, 'scholarship_applications'),

@@ -221,9 +221,12 @@ export default function ScoreInput() {
                     <td key={c.id} className="px-6 py-4 text-center">
                       <input 
                         type="number" 
+                        step="1"
+                        min="0"
+                        max="100"
                         value={student.scores[c.id] || 0}
                         onChange={(e) => handleScoreChange(student.id, c.id, e.target.value)}
-                        className="w-16 h-10 text-center border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                        className="w-16 h-10 text-center border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white font-bold"
                       />
                     </td>
                   ))}
