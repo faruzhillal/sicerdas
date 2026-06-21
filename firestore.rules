@@ -44,13 +44,25 @@ service cloud.firestore {
     // 2. Rankings Collection
     match /rankings/{rankId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || (
+        isSignedIn() && (
+          rankId == request.auth.uid || 
+          (rankId.size() > 8 && rankId.matches('^student_[a-zA-Z0-9_\\-]+$') && 
+           rankId == 'student_' + get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('studentId', 'none'))
+        )
+      );
     }
 
     // 3. Criteria Scores Collection
     match /criteria_scores/{scoreId} {
       allow read: if isSignedIn();
-      allow write: if isAdmin() || (isSignedIn() && scoreId == request.auth.uid);
+      allow write: if isAdmin() || (
+        isSignedIn() && (
+          scoreId == request.auth.uid ||
+          (scoreId.size() > 8 && scoreId.matches('^student_[a-zA-Z0-9_\\-]+$') && 
+           scoreId == 'student_' + get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('studentId', 'none'))
+        )
+      );
     }
 
     // 4. Scholarships Collection
@@ -62,10 +74,22 @@ service cloud.firestore {
     // 5. Scholarship Applications
     match /scholarship_applications/{appId} {
       allow read: if isAdmin() || 
-                    (isSignedIn() && (resource.data.studentId == request.auth.uid)) ||
+                    (isSignedIn() && (
+                      resource.data.studentId == request.auth.uid ||
+                      resource.data.studentId == 'student_' + get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('studentId', 'none')
+                    )) ||
                     (resource.data.get('status', 'none') == 'approved');
       allow create: if isSignedIn() && request.resource.data.studentId == request.auth.uid;
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || 
+                    (isSignedIn() && (
+                      resource.data.studentId == request.auth.uid &&
+                      (!('status' in request.resource.data) || request.resource.data.status == resource.data.status)
+                    ));
+      allow delete: if isAdmin() ||
+                    (isSignedIn() && (
+                      resource.data.studentId == request.auth.uid ||
+                      resource.data.studentId == 'student_' + get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('studentId', 'none')
+                    ));
     }
 
     // 6. Complaints

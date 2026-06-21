@@ -166,6 +166,50 @@ export default function LoginPage() {
                       updatedAt: new Date().toISOString()
                     }, { merge: true });
 
+                    // Migrate criteria_scores
+                    try {
+                      const oldScoresRef = doc(db, 'criteria_scores', lookupData.uid);
+                      const oldScoresSnap = await getDoc(oldScoresRef);
+                      if (oldScoresSnap.exists()) {
+                        await setDoc(doc(db, 'criteria_scores', user.uid), oldScoresSnap.data(), { merge: true });
+                        await deleteDoc(oldScoresRef);
+                      }
+                    } catch (err) {
+                      console.error("Failed to migrate criteria_scores:", err);
+                    }
+
+                    // Migrate rankings
+                    try {
+                      const oldRankRef = doc(db, 'rankings', lookupData.uid);
+                      const oldRankSnap = await getDoc(oldRankRef);
+                      if (oldRankSnap.exists()) {
+                        await setDoc(doc(db, 'rankings', user.uid), {
+                          ...oldRankSnap.data(),
+                          studentId: user.uid
+                        }, { merge: true });
+                        await deleteDoc(oldRankRef);
+                      }
+                    } catch (err) {
+                      console.error("Failed to migrate rankings:", err);
+                    }
+
+                    // Migrate scholarship_applications
+                    try {
+                      const appsQuery = query(collection(db, 'scholarship_applications'), where('studentId', '==', lookupData.uid));
+                      const appsSnap = await getDocs(appsQuery);
+                      for (const appDoc of appsSnap.docs) {
+                        const appData = appDoc.data();
+                        const newId = appDoc.id.replace(lookupData.uid, user.uid);
+                        await setDoc(doc(db, 'scholarship_applications', newId), {
+                          ...appData,
+                          studentId: user.uid
+                        }, { merge: true });
+                        await deleteDoc(doc(db, 'scholarship_applications', appDoc.id));
+                      }
+                    } catch (err) {
+                      console.error("Failed to migrate scholarship_applications:", err);
+                    }
+
                     await deleteDoc(tempDocRef);
                   }
                 }

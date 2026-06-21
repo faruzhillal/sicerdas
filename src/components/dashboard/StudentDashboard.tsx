@@ -24,7 +24,7 @@ import StatCard from './StatCard';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy, limit, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, limit, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
 export default function StudentDashboard() {
@@ -108,11 +108,54 @@ export default function StudentDashboard() {
         setEditForm(fallback);
       }
 
-      // 2. Fetch evaluation criteria scores (0-100 scale)
+      // 2. Fetch evaluation criteria scores (0-100 scale) with self-healing fallback
+      const sId = userData.studentId || profile?.studentId || '';
       const scoresDocRef = doc(db, 'criteria_scores', currentUser.uid);
-      const scoresDocSnap = await getDoc(scoresDocRef);
+      let scoresDocSnap = await getDoc(scoresDocRef);
+      
+      if (!scoresDocSnap.exists() && sId) {
+        const fallbackRef = doc(db, 'criteria_scores', `student_${sId}`);
+        const fallbackSnap = await getDoc(fallbackRef);
+        if (fallbackSnap.exists()) {
+          const fallbackData = fallbackSnap.data();
+          await setDoc(scoresDocRef, fallbackData, { merge: true });
+          scoresDocSnap = await getDoc(scoresDocRef);
+          try {
+            await deleteDoc(fallbackRef);
+          } catch (e) {
+            console.error("Failed to delete fallback criteria score document:", e);
+          }
+        }
+      }
+
       if (scoresDocSnap.exists()) {
         setUserScores(scoresDocSnap.data());
+      }
+
+      // Proactively heal ranking document if it's stuck under temporary ID
+      if (sId) {
+        try {
+          const newRankingRef = doc(db, 'rankings', currentUser.uid);
+          const newRankingSnap = await getDoc(newRankingRef);
+          if (!newRankingSnap.exists()) {
+            const oldRankingRef = doc(db, 'rankings', `student_${sId}`);
+            const oldRankingSnap = await getDoc(oldRankingRef);
+            if (oldRankingSnap.exists()) {
+              const oldRankData = oldRankingSnap.data();
+              await setDoc(newRankingRef, {
+                ...oldRankData,
+                studentId: currentUser.uid
+              }, { merge: true });
+              try {
+                await deleteDoc(oldRankingRef);
+              } catch (e) {
+                console.error("Failed to delete fallback ranking document:", e);
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Failed to auto-heal ranking document:", e);
+        }
       }
 
       // 3. Average score calculation from evaluation scores
@@ -570,7 +613,7 @@ export default function StudentDashboard() {
                     </div>
                     <div>
                       <div className="flex justify-between items-end mb-1.5">
-                        <span className="text-xs text-slate-400 font-bold">Skorsing</span>
+                        <span className="text-xs text-slate-400 font-bold">Skor</span>
                         <span className="text-lg font-black text-slate-900">{userScores.nilaiAkademik || 0}</span>
                       </div>
                       <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -590,7 +633,7 @@ export default function StudentDashboard() {
                     </div>
                     <div>
                       <div className="flex justify-between items-end mb-1.5">
-                        <span className="text-xs text-slate-400 font-bold">Skorsing</span>
+                        <span className="text-xs text-slate-400 font-bold">Skor</span>
                         <span className="text-lg font-black text-slate-900">{userScores.nilaiHafalan || 0}</span>
                       </div>
                       <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -610,7 +653,7 @@ export default function StudentDashboard() {
                     </div>
                     <div>
                       <div className="flex justify-between items-end mb-1.5">
-                        <span className="text-xs text-slate-400 font-bold">Skorsing</span>
+                        <span className="text-xs text-slate-400 font-bold">Skor</span>
                         <span className="text-lg font-black text-slate-900">{userScores.nilaiPerilaku || 0}</span>
                       </div>
                       <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -630,7 +673,7 @@ export default function StudentDashboard() {
                     </div>
                     <div>
                       <div className="flex justify-between items-end mb-1.5">
-                        <span className="text-xs text-slate-400 font-bold">Skorsing</span>
+                        <span className="text-xs text-slate-400 font-bold">Skor</span>
                         <span className="text-lg font-black text-slate-900">{userScores.nilaiPresensi || 0}</span>
                       </div>
                       <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -650,7 +693,7 @@ export default function StudentDashboard() {
                     </div>
                     <div>
                       <div className="flex justify-between items-end mb-1.5">
-                        <span className="text-xs text-slate-400 font-bold">Skorsing (Semakin rendah semakin diutamakan)</span>
+                        <span className="text-xs text-slate-400 font-bold">Skor (Semakin rendah semakin diutamakan)</span>
                         <span className="text-lg font-black text-slate-900">{userScores.nilaiPenghasilan || 0}</span>
                       </div>
                       <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -670,7 +713,7 @@ export default function StudentDashboard() {
                     </div>
                     <div>
                       <div className="flex justify-between items-end mb-1.5">
-                        <span className="text-xs text-slate-400 font-bold">Skorsing</span>
+                        <span className="text-xs text-slate-400 font-bold">Skor</span>
                         <span className="text-lg font-black text-slate-900">{userScores.nilaiTanggungan || 0}</span>
                       </div>
                       <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
