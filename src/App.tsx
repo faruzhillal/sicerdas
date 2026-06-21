@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from './lib/firebase';
 import { doc, getDoc, getDocFromServer } from 'firebase/firestore';
+import { MotionConfig } from 'motion/react';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -43,22 +44,24 @@ export default function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-emerald-100 selection:text-emerald-900">
-          <Navbar />
-          <main className="flex-grow">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/ranking" element={<RankingPage />} />
-              <Route path="/scholarships" element={<ScholarshipPage />} />
-              <Route path="/complaints" element={<ComplaintsPage />} />
-              <Route path="/school-detail" element={<SchoolDetailPage />} />
-              <Route path="/dashboard/*" element={<DashboardPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+        <MotionConfig transition={{ type: 'tween', ease: 'easeOut', duration: 0.18 }}>
+          <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-emerald-100 selection:text-emerald-900">
+            <Navbar />
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/ranking" element={<RankingPage />} />
+                <Route path="/scholarships" element={<ScholarshipPage />} />
+                <Route path="/complaints" element={<ComplaintsPage />} />
+                <Route path="/school-detail" element={<SchoolDetailPage />} />
+                <Route path="/dashboard/*" element={<DashboardPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </MotionConfig>
       </AuthProvider>
     </Router>
   );
