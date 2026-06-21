@@ -19,7 +19,7 @@ service cloud.firestore {
       return isSignedIn() && 
              request.auth.token != null && 
              'email' in request.auth.token && (
-               request.auth.token.email.lower() == 'faruzhillal465@gmail.com' ||
+               request.auth.token.email.lowerAscii() == 'faruzhillal465@gmail.com' ||
                (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
                 get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'none') == 'admin')
              );
@@ -32,7 +32,12 @@ service cloud.firestore {
     // 1. Users Collection
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow create, update, delete: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow create, update: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow delete: if isSignedIn() && (
+        isOwner(userId) || 
+        isAdmin() ||
+        (userId.size() > 8 && userId.matches('^student_[a-zA-Z0-9_\\-]+$') && ('email' in resource.data) && ('email' in request.auth.token) && resource.data.email.lowerAscii() == request.auth.token.email.lowerAscii())
+      );
       allow list: if isSignedIn();
     }
 
@@ -92,6 +97,13 @@ service cloud.firestore {
     // 9. News
     match /news/{docId} {
       allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // 10. Users Lookup (to resolve temporary pre-registered profiles)
+    match /users_lookup/{lookupId} {
+      allow get: if true;
+      allow list: if false;
       allow write: if isAdmin();
     }
     

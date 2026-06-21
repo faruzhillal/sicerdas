@@ -25,6 +25,8 @@ interface Student {
   parentJob?: string;
   parentIncome?: string;
   role: 'student';
+  username?: string;
+  password?: string;
 }
 
 export default function StudentManager() {
@@ -179,6 +181,43 @@ export default function StudentManager() {
       unsubscribeStudents();
     };
   }, []);
+
+  // Synchronize student accounts to users_lookup for seamless first-time logins
+  useEffect(() => {
+    if (students.length === 0) return;
+    
+    const syncUsersLookup = async () => {
+      try {
+        for (const student of students) {
+          if (student.email || student.username) {
+            const p = student.password || 'password123';
+            if (student.email) {
+              const emailKey = student.email.trim().toLowerCase();
+              await setDoc(doc(db, 'users_lookup', emailKey), {
+                uid: student.uid,
+                email: student.email.trim().toLowerCase(),
+                username: student.username ? student.username.trim() : '',
+                password: p
+              }, { merge: true });
+            }
+            if (student.username) {
+              const unameKey = student.username.trim().toLowerCase();
+              await setDoc(doc(db, 'users_lookup', unameKey), {
+                uid: student.uid,
+                email: student.email ? student.email.trim().toLowerCase() : '',
+                username: student.username.trim(),
+                password: p
+              }, { merge: true });
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Auto-sync of users_lookup failed:", err);
+      }
+    };
+    
+    syncUsersLookup();
+  }, [students]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -6,6 +6,7 @@ import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, dele
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, User, LogIn, Chrome, Mail, Lock, UserPlus, KeyRound, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { classTwoInitialData } from '../data/class2Data';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -107,56 +108,103 @@ export default function LoginPage() {
           // Attempt standard login first
           authResult = await signInWithEmailAndPassword(auth, email, password);
         } catch (authErr: any) {
-          // If standard auth fails, check if there is a pre-registered student
-          const usersRef = collection(db, 'users');
-          // Query by email
-          let userSnap = await getDocs(query(usersRef, where('email', '==', email)));
-          if (userSnap.empty) {
-            // Also try querying by username
-            userSnap = await getDocs(query(usersRef, where('username', '==', email)));
-          }
+          const cleanEmail = email.trim().toLowerCase();
 
-          if (!userSnap.empty) {
-            const userDoc = userSnap.docs[0];
-            const userData = userDoc.data();
-            
-            // Check password match (stored in DB)
-            if (userData.password === password) {
-              resolvedEmail = userData.email || `${userData.username}@gmail.com`;
+          // 1. Special Admin Auto-Create Helper
+          if (cleanEmail === 'faruzhillal465@gmail.com') {
+            try {
+              authResult = await createUserWithEmailAndPassword(auth, email, password);
               
-              try {
-                // Try logging in with the resolved email
-                authResult = await signInWithEmailAndPassword(auth, resolvedEmail, password);
-              } catch (signInErr: any) {
-                // If sign in fails (likely account doesn't exist in auth yet), auto register!
-                if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password') {
-                  authResult = await createUserWithEmailAndPassword(auth, resolvedEmail, password);
-                } else {
-                  throw signInErr;
-                }
-              }
-
+              // Seed the admin profile
               const user = authResult.user;
+              await setDoc(doc(db, 'users', user.uid), {
+                uid: user.uid,
+                email: user.email,
+                fullName: 'Faruz Hillal',
+                role: 'admin',
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+              });
+            } catch (createErr: any) {
+              // If already created in Auth but passwords didn't match
+              throw authErr;
+            }
+          } else {
+            // 2. Pre-registered student lookup in Firestore
+            const lookupRef = doc(db, 'users_lookup', cleanEmail);
+            const lookupSnap = await getDoc(lookupRef);
+
+            if (lookupSnap.exists()) {
+              const lookupData = lookupSnap.data();
               
-              // Move pre-created student data to their real UID doc if needed
-              if (userDoc.id !== user.uid) {
-                // Set the correct uid structure in users collection
+              if (lookupData.password === password) {
+                resolvedEmail = lookupData.email || `${lookupData.username}@gmail.com`;
+                
+                try {
+                  authResult = await signInWithEmailAndPassword(auth, resolvedEmail, password);
+                } catch (signInErr: any) {
+                  if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password') {
+                    authResult = await createUserWithEmailAndPassword(auth, resolvedEmail, password);
+                  } else {
+                    throw signInErr;
+                  }
+                }
+
+                const user = authResult.user;
+                const tempDocRef = doc(db, 'users', lookupData.uid);
+                const tempDocSnap = await getDoc(tempDocRef);
+
+                if (tempDocSnap.exists()) {
+                  const userData = tempDocSnap.data();
+                  if (lookupData.uid !== user.uid) {
+                    await setDoc(doc(db, 'users', user.uid), {
+                      ...userData,
+                      uid: user.uid,
+                      status: 'active',
+                      lastLogin: new Date().toISOString(),
+                      updatedAt: new Date().toISOString()
+                    }, { merge: true });
+
+                    await deleteDoc(tempDocRef);
+                  }
+                }
+              } else {
+                throw authErr;
+              }
+            } else {
+              // 3. Fallback to Local Static Registry classTwoInitialData
+              const matchedStaticStudent = classTwoInitialData.find(
+                s => s.username?.toLowerCase() === cleanEmail || s.email?.toLowerCase() === cleanEmail
+              );
+
+              if (matchedStaticStudent && matchedStaticStudent.password === password) {
+                resolvedEmail = matchedStaticStudent.email || `${matchedStaticStudent.username}@gmail.com`;
+                
+                try {
+                  authResult = await signInWithEmailAndPassword(auth, resolvedEmail, password);
+                } catch (signInErr: any) {
+                  if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password') {
+                    authResult = await createUserWithEmailAndPassword(auth, resolvedEmail, password);
+                  } else {
+                    throw signInErr;
+                  }
+                }
+
+                const user = authResult.user;
+                // Since this student isn't in firestore users yet, create it now!
                 await setDoc(doc(db, 'users', user.uid), {
-                  ...userData,
+                  ...matchedStaticStudent,
                   uid: user.uid,
                   status: 'active',
+                  createdAt: new Date().toISOString(),
                   lastLogin: new Date().toISOString(),
                   updatedAt: new Date().toISOString()
                 }, { merge: true });
-
-                // Clean up the temporary document
-                await deleteDoc(doc(db, 'users', userDoc.id));
+              } else {
+                throw authErr;
               }
-            } else {
-              throw authErr; // Incorrect password
             }
-          } else {
-            throw authErr; // Pre-created user not found and standard auth failed
           }
         }
 
