@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { Trophy, GraduationCap, ArrowRight, Star, CheckCircle2, Users, BookOpen, ShieldCheck, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import heroImage from '../assets/images/regenerated_image_1782052082260.jpg';
 
 const stats = [
   { label: 'Siswa Aktif', value: '450+', icon: Users },
@@ -61,7 +62,7 @@ export default function HomePage() {
               <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white bg-slate-100">
                 <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/20 to-transparent z-10" />
                 <img
-                  src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=800"
+                  src={heroImage}
                   alt="Student scholarship"
                   className="w-full aspect-[4/3] object-cover"
                 />
