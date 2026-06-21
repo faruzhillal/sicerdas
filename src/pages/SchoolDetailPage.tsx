@@ -346,7 +346,7 @@ export default function SchoolDetailPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent pointer-events-none" />
               <div className="absolute bottom-8 left-8 right-8 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
-                <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Kunjungi Sekolah Kami</p>
+                <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Kunjungi Kampus Kami</p>
                 <p className="text-sm font-medium text-white">Buka setiap hari kerja pukul 07:00 - 15:30 WIB</p>
               </div>
             </div>

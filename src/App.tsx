@@ -47,7 +47,7 @@ export default function App() {
         <MotionConfig transition={{ type: 'tween', ease: 'easeOut', duration: 0.18 }}>
           <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-emerald-100 selection:text-emerald-900">
             <Navbar />
-            <main className="flex-grow">
+            <main className="grow">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />

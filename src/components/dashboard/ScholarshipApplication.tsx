@@ -29,6 +29,7 @@ export default function ScholarshipApplication() {
     parentName: '',
     parentJob: '',
     parentIncome: '',
+    dependents: '1',
     notes: '',
     criteriaValues: {
       nilaiAkademik: 0,
@@ -91,7 +92,7 @@ export default function ScholarshipApplication() {
         const scoresData = scoresDoc.exists() ? scoresDoc.data() : {};
         
         // Auto-detect other fields from profile/demographics
-        const dependentsCount = Number((profile as any)?.dependents) || 0;
+        const dependentsCount = Number((profile as any)?.dependents || 1);
         const mappedTanggungan = Math.min(100, Math.max(0, dependentsCount * 20 || 50));
 
         let mappedIncomeValue = 50;
@@ -105,11 +106,13 @@ export default function ScholarshipApplication() {
 
         setFormData(prev => ({
           ...prev,
+          dependents: prev.dependents || String(dependentsCount || '1'),
+          parentIncome: prev.parentIncome || (profile as any)?.parentIncome || '',
           criteriaValues: {
-            nilaiAkademik: Math.round(Number(scoresData.academic) || (scoresData.gpa ? scoresData.gpa * 10 : 80)),
-            nilaiHafalan: Math.round(Number(scoresData.tahfidz || scoresData.hafalan) || 75),
-            nilaiPerilaku: Math.round(Number(scoresData.behavior) || 85),
-            nilaiPresensi: Math.round(Number(scoresData.attendance) || 90),
+            nilaiAkademik: Math.round(Number(scoresData.nilaiAkademik || scoresData.academic || (scoresData.gpa ? scoresData.gpa * 10 : 80)) || 0),
+            nilaiHafalan: Math.round(Number(scoresData.nilaiHafalan || scoresData.tahfidz || scoresData.hafalan || 75) || 0),
+            nilaiPerilaku: Math.round(Number(scoresData.nilaiPerilaku || scoresData.behavior || 85) || 0),
+            nilaiPresensi: Math.round(Number(scoresData.nilaiPresensi || scoresData.attendance || 90) || 0),
             nilaiPenghasilan: mappedIncomeValue,
             nilaiTanggungan: mappedTanggungan
           }
@@ -133,9 +136,40 @@ export default function ScholarshipApplication() {
         parentName: prev.parentName || (profile as any).parentName || '',
         parentJob: prev.parentJob || (profile as any).parentJob || '',
         parentIncome: prev.parentIncome || (profile as any).parentIncome || '',
+        dependents: prev.dependents || String((profile as any).dependents || '1'),
       }));
     }
   }, [profile]);
+
+  // Synchronize financial & dependent criteria calculations dynamically
+  useEffect(() => {
+    let mappedIncomeValue = 50;
+    if (formData.parentIncome === INCOME_RANGES[0]) mappedIncomeValue = 20;
+    else if (formData.parentIncome === INCOME_RANGES[1]) mappedIncomeValue = 40;
+    else if (formData.parentIncome === INCOME_RANGES[2]) mappedIncomeValue = 60;
+    else if (formData.parentIncome === INCOME_RANGES[3]) mappedIncomeValue = 80;
+    else if (formData.parentIncome === INCOME_RANGES[4]) mappedIncomeValue = 100;
+
+    const dependentsCount = Number(formData.dependents) || 1;
+    const mappedTanggungan = Math.min(100, Math.max(0, dependentsCount * 20 || 50));
+
+    setFormData(prev => {
+      if (
+        prev.criteriaValues.nilaiPenghasilan !== mappedIncomeValue ||
+        prev.criteriaValues.nilaiTanggungan !== mappedTanggungan
+      ) {
+        return {
+          ...prev,
+          criteriaValues: {
+            ...prev.criteriaValues,
+            nilaiPenghasilan: mappedIncomeValue,
+            nilaiTanggungan: mappedTanggungan
+          }
+        };
+      }
+      return prev;
+    });
+  }, [formData.parentIncome, formData.dependents]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -327,7 +361,7 @@ export default function ScholarshipApplication() {
                   className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
                 />
               </div>
-              <div className="sm:col-span-2 space-y-2">
+              <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Rata-rata Penghasilan per Bulan *</label>
                 <select 
                   required
@@ -341,126 +375,143 @@ export default function ScholarshipApplication() {
                   ))}
                 </select>
               </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Jumlah Tanggungan Orang Tua / Wali *</label>
+                <select 
+                  required
+                  value={formData.dependents}
+                  onChange={(e) => setFormData({ ...formData, dependents: e.target.value })}
+                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all bg-white"
+                >
+                  <option value="1">1 Orang Anak / Jiwa</option>
+                  <option value="2">2 Orang Anak / Jiwa</option>
+                  <option value="3">3 Orang Anak / Jiwa</option>
+                  <option value="4">4 Orang Anak / Jiwa</option>
+                  <option value="5">5 Orang Anak / Jiwa atau lebih</option>
+                </select>
+              </div>
             </div>
           </section>
 
-          {/* SECTION C: KRITERIA BEASISWA (SPK) */}
+          {/* SECTION C: PERSENTASE KELAYAKAN BEASISWA (PREFILL DARI DATABASE SEKOLAH) */}
           <section className="space-y-6">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">C</div>
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Kriteria Kelayakan Beasiswa (Skor 0 - 100)</h2>
+              <div className="flex-1">
+                <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Kriteria Kelayakan Beasiswa (SPK)</h2>
+                <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+                  Nilai kriteria sensitif diambil & diverifikasi langsung dari basis data resmi Admin/Sekolah secara realtime untuk objektivitas SPK.
+                </p>
+              </div>
             </div>
-            
+
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Nilai Akademik (0-100)</label>
-                <input 
-                  type="number" 
-                  min="0"
-                  max="100"
-                  required
-                  placeholder="Nilai Akademik"
-                  value={formData.criteriaValues.nilaiAkademik}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    criteriaValues: { ...formData.criteriaValues, nilaiAkademik: Math.round(Number(e.target.value)) || 0 } 
-                  })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
-                />
-                <span className="text-[10px] text-slate-400 block">Prefill otomatis / diisi oleh Sekolah</span>
+              {/* Akademik */}
+              <div className="bg-slate-50/50 border border-slate-200/80 rounded-2xl p-5 space-y-2 relative overflow-hidden">
+                <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-indigo-50 border border-indigo-100 rounded-full text-[9px] uppercase font-bold text-indigo-600 tracking-wider">
+                  Admin Lock
+                </div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Nilai Akademik</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-slate-800">
+                    {formData.criteriaValues.nilaiAkademik || "0"}
+                  </span>
+                  <span className="text-xs text-slate-400 font-bold">/ 100</span>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-normal">
+                  Diambil secara langsung dari data Rapor & prestasi akademik resmi sekolah Anda.
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Nilai Hafalan Quran (0-100)</label>
-                <input 
-                  type="number" 
-                  min="0"
-                  max="100"
-                  required
-                  placeholder="Nilai Hafalan/Tahfidz"
-                  value={formData.criteriaValues.nilaiHafalan}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    criteriaValues: { ...formData.criteriaValues, nilaiHafalan: Math.round(Number(e.target.value)) || 0 } 
-                  })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
-                />
-                <span className="text-[10px] text-slate-400 block">Diutamakan untuk Beasiswa Hafalan</span>
+              {/* Hafalan */}
+              <div className="bg-slate-50/50 border border-slate-200/80 rounded-2xl p-5 space-y-2 relative overflow-hidden">
+                <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-indigo-50 border border-indigo-100 rounded-full text-[9px] uppercase font-bold text-indigo-600 tracking-wider">
+                  Admin Lock
+                </div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Nilai Hafalan Quran</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-slate-800">
+                    {formData.criteriaValues.nilaiHafalan || "0"}
+                  </span>
+                  <span className="text-xs text-slate-400 font-bold">/ 100</span>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-normal">
+                  Diambil berdasarkan kuantitas & kualitas tahfidz/hafalan resmi di sekolah.
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Nilai Perilaku & Akhlak (0-100)</label>
-                <input 
-                  type="number" 
-                  min="0"
-                  max="100"
-                  required
-                  placeholder="Nilai Sikap/Perilaku"
-                  value={formData.criteriaValues.nilaiPerilaku}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    criteriaValues: { ...formData.criteriaValues, nilaiPerilaku: Math.round(Number(e.target.value)) || 0 } 
-                  })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
-                />
-                <span className="text-[10px] text-slate-400 block">Berdasarkan kedisplinan kelas</span>
+              {/* Perilaku */}
+              <div className="bg-slate-50/50 border border-slate-200/80 rounded-2xl p-5 space-y-2 relative overflow-hidden">
+                <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-indigo-50 border border-indigo-100 rounded-full text-[9px] uppercase font-bold text-indigo-600 tracking-wider">
+                  Admin Lock
+                </div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Nilai Perilaku / Akhlak</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-slate-800">
+                    {formData.criteriaValues.nilaiPerilaku || "0"}
+                  </span>
+                  <span className="text-xs text-slate-400 font-bold">/ 100</span>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-normal">
+                  Diambil dari catatan kepribadian resmi bimbingan konseling dan wali kelas.
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Nilai Kehadiran / Presensi (0-100)</label>
-                <input 
-                  type="number" 
-                  min="0"
-                  max="100"
-                  required
-                  placeholder="Persentase Keaktifan"
-                  value={formData.criteriaValues.nilaiPresensi}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    criteriaValues: { ...formData.criteriaValues, nilaiPresensi: Math.round(Number(e.target.value)) || 0 } 
-                  })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
-                />
-                <span className="text-[10px] text-slate-400 block">Sesuai absensi sekolah harian</span>
+              {/* Kehadiran */}
+              <div className="bg-slate-50/50 border border-slate-200/80 rounded-2xl p-5 space-y-2 relative overflow-hidden">
+                <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-indigo-50 border border-indigo-100 rounded-full text-[9px] uppercase font-bold text-indigo-600 tracking-wider">
+                  Admin Lock
+                </div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Nilai Presensi / Kehadiran</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-slate-800">
+                    {formData.criteriaValues.nilaiPresensi || "0"}
+                  </span>
+                  <span className="text-xs text-slate-400 font-bold">/ 100</span>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-normal">
+                  Akumulasi persentase keaktifan kehadiran dalam kegiatan belajar harian.
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Skor Ekonomi Keluarga (0-100)</label>
-                <input 
-                  type="number" 
-                  min="0"
-                  max="100"
-                  required
-                  placeholder="Kondisi Finansial (Sifat Cost)"
-                  value={formData.criteriaValues.nilaiPenghasilan}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    criteriaValues: { ...formData.criteriaValues, nilaiPenghasilan: Math.round(Number(e.target.value)) || 0 } 
-                  })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
-                />
-                <span className="text-[10px] text-slate-400 block">Semakin tinggi = semakin mampu (Cost)</span>
+              {/* Ekonomi keluarga */}
+              <div className="bg-emerald-50/30 border border-emerald-100/80 rounded-2xl p-5 space-y-2 relative overflow-hidden">
+                <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-emerald-100/50 border border-emerald-200 rounded-full text-[9px] uppercase font-bold text-emerald-800 tracking-wider">
+                  Auto Calc
+                </div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Skor Ekonomi Keluarga</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-emerald-700">
+                    {formData.criteriaValues.nilaiPenghasilan}
+                  </span>
+                  <span className="text-xs text-slate-400 font-bold">/ 100</span>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-normal">
+                  Diperoleh secara otomatis berdasarkan pilihan rentang penghasilan bulanan di Section B.
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Skor Tanggungan Siswa (0-100)</label>
-                <input 
-                  type="number" 
-                  min="0"
-                  max="100"
-                  required
-                  placeholder="Beban Tanggungan"
-                  value={formData.criteriaValues.nilaiTanggungan}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    criteriaValues: { ...formData.criteriaValues, nilaiTanggungan: Math.round(Number(e.target.value)) || 0 } 
-                  })}
-                  className="w-full px-5 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
-                />
-                <span className="text-[10px] text-slate-400 block">Banyaknya saudara/tanggungan keluarga</span>
+              {/* Tanggungan */}
+              <div className="bg-emerald-50/30 border border-emerald-100/80 rounded-2xl p-5 space-y-2 relative overflow-hidden">
+                <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-emerald-100/50 border border-emerald-200 rounded-full text-[9px] uppercase font-bold text-emerald-800 tracking-wider">
+                  Auto Calc
+                </div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Skor Tanggungan Orang Tua</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-emerald-700">
+                    {formData.criteriaValues.nilaiTanggungan}
+                  </span>
+                  <span className="text-xs text-slate-400 font-bold">/ 100</span>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-normal">
+                  Diperoleh secara otomatis berdasarkan jumlah tanggungan di Section B.
+                </p>
               </div>
             </div>
-            <p className="text-[10px] text-slate-400 italic">Data ini dikonversi penuh ke skala 1-100 tanpa desimal sesuai arahan SPK beasiswa untuk penentuan prioritas ranking menggunakan metode SAW.</p>
+
+            <p className="text-[10.5px] text-slate-400 italic font-medium leading-relaxed">
+              * Seluruh data kriteria di atas dikonversi secara otomatis ke nilai skala 1-100 sesuai arahan formulasi kualitatif SPK beasiswa metode SAW (Simple Additive Weighting).
+            </p>
           </section>
 
           {/* SECTION D: KELENGKAPAN BERKAS */}

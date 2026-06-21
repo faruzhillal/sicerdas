@@ -319,7 +319,7 @@ export default function ScholarshipSAW() {
                 </div>
             </div>
             
-            <div className="flex gap-8 border-l border-slate-100 pl-8 hidden lg:flex">
+            <div className="hidden lg:flex gap-8 border-l border-slate-100 pl-8">
                 <div className="text-center">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Pendaftar</p>
                     <p className="text-xl font-black text-emerald-600">{applications.length}</p>
@@ -342,7 +342,7 @@ export default function ScholarshipSAW() {
       </div>
 
       {applications.length === 0 && !loading ? (
-        <div className="bg-amber-50 border border-amber-100 p-8 rounded-[2rem] text-center max-w-2xl mx-auto space-y-4">
+        <div className="bg-amber-50 border border-amber-100 p-8 rounded-4xl text-center max-w-2xl mx-auto space-y-4">
           <AlertCircle className="mx-auto text-amber-500" size={48} />
           <h3 className="text-lg font-black text-amber-900">Belum Ada Pendaftar</h3>
           <p className="text-sm text-amber-700 leading-relaxed font-medium">
