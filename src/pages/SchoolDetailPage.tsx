@@ -277,7 +277,7 @@ export default function SchoolDetailPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-white mb-1">Alamat Sekolah</h4>
-                    <p className="text-slate-400 text-sm font-medium">Jl. KH. Mahmud No. 123, Kel. Sukamaju, Kec. Cerdas, Kota Pendidikan, 12345</p>
+                    <p className="text-slate-400 text-sm font-medium">SD QUR'AN AL-MAHMUDAH, cogreg, kec.parung, kabupaten bogor, jawabarat 16330</p>
                   </div>
                 </div>
                 <div className="flex gap-6">
@@ -286,7 +286,7 @@ export default function SchoolDetailPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-white mb-1">Telepon & WhatsApp</h4>
-                    <p className="text-slate-400 text-sm font-medium">(021) 1234 5678 / +62 812 3456 7890</p>
+                    <p className="text-slate-400 text-sm font-medium">0823-1412-0498 / 0897-8179-274</p>
                   </div>
                 </div>
                 <div className="flex gap-6">
@@ -295,27 +295,51 @@ export default function SchoolDetailPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-white mb-1">Email Resmi</h4>
-                    <p className="text-slate-400 text-sm font-medium">kontak@sdq-almahmudah.sch.id</p>
+                    <p className="text-slate-400 text-sm font-medium">sdqalmahmudahbogor@gmail.com</p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-12 flex gap-4">
-                {['Facebook', 'Instagram', 'Twitter', 'Youtube'].map(social => (
-                  <button 
-                    key={social}
-                    className="w-10 h-10 bg-white/5 hover:bg-emerald-600 rounded-xl flex items-center justify-center text-[10px] font-black uppercase transition-all"
-                  >
-                    {social[0]}
-                  </button>
-                ))}
+                <a 
+                  href="https://www.instagram.com/sdq_almahmudah" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="px-4 py-2 bg-white/5 hover:bg-emerald-600 rounded-xl flex items-center gap-2 text-xs font-black uppercase transition-all text-white"
+                >
+                  <span>Instagram</span>
+                </a>
+                <a 
+                  href="https://www.youtube.com/results?search_query=SDQ+AL+MAHUDAH" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="px-4 py-2 bg-white/5 hover:bg-emerald-600 rounded-xl flex items-center gap-2 text-xs font-black uppercase transition-all text-white"
+                >
+                  <span>Youtube</span>
+                </a>
+                <a 
+                  href="https://wa.me/6282314120498" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="px-4 py-2 bg-white/5 hover:bg-emerald-600 rounded-xl flex items-center gap-2 text-xs font-black uppercase transition-all text-white"
+                >
+                  <span>WhatsApp 1</span>
+                </a>
+                <a 
+                  href="https://wa.me/628978179274" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="px-4 py-2 bg-white/5 hover:bg-emerald-600 rounded-xl flex items-center gap-2 text-xs font-black uppercase transition-all text-white"
+                >
+                  <span>WhatsApp 2</span>
+                </a>
               </div>
             </div>
 
             <div className="relative h-[400px] lg:h-auto min-h-[400px] bg-slate-800 rounded-[3rem] overflow-hidden border border-white/10">
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126915.228515!2d106.78912!3d-6.229728!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e3fdb7%3A0x7000000000000000!2sJakarta!5e0!3m2!1sen!2sid!4v1234567890123" 
-                className="absolute inset-0 w-full h-full opacity-70 grayscale contrast-125 invert"
+                src="https://maps.google.com/maps?q=SD%20QUR'AN%20AL-MAHMUDAH,%20cogreg,%20kec.parung,%20kabupaten%20bogor,%20jawabarat%2016330&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                className="absolute inset-0 w-full h-full opacity-80 grayscale contrast-125 invert"
                 loading="lazy"
                 title="Peta Lokasi Sekolah"
               />
