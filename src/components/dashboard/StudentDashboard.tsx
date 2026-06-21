@@ -133,19 +133,25 @@ export default function StudentDashboard() {
       let rankStr = '-';
       if (activeClass) {
         try {
-          const classRankQuery = query(
-            collection(db, 'rankings'),
-            where('class', '==', activeClass)
-          );
-          const rankSnap = await getDocs(classRankQuery);
-          if (!rankSnap.empty) {
-            const classRankings = rankSnap.docs.map(d => {
+          const rankingsSnap = await getDocs(collection(db, 'rankings'));
+          const targetNorm = activeClass.toLowerCase().replace('kelas ', '').trim();
+          
+          const classRankings = rankingsSnap.docs
+            .map(d => {
               const rData = d.data();
               return {
                 studentId: rData.studentId || d.id,
-                score: Number(rData.score) || 0
+                class: rData.class || '',
+                score: Number(rData.score) || Number(rData.totalScore) || 0
               };
+            })
+            .filter(r => {
+              if (!r.class) return false;
+              const normalizedClass = r.class.toLowerCase().replace('kelas ', '').trim();
+              return normalizedClass === targetNorm;
             });
+
+          if (classRankings.length > 0) {
             classRankings.sort((a, b) => b.score - a.score);
             const myIdx = classRankings.findIndex(r => r.studentId === currentUser.uid);
             if (myIdx !== -1) {
@@ -153,7 +159,7 @@ export default function StudentDashboard() {
             }
           }
         } catch (err) {
-          console.error("Error calculating class rankings:", err);
+          console.error("Error calculating class rankings gracefully:", err);
         }
       }
 
@@ -255,14 +261,19 @@ export default function StudentDashboard() {
         updatedAt: new Date().toISOString()
       };
 
-      await setDoc(doc(db, 'users', currentUser.uid), updatedData, { merge: true });
+      // Ensure no undefined properties are written to Firestore as it throws exceptions
+      const cleanData = Object.fromEntries(
+        Object.entries(updatedData).filter(([_, v]) => v !== undefined)
+      );
+
+      await setDoc(doc(db, 'users', currentUser.uid), cleanData, { merge: true });
       alert("Biodata dan data orang tua berhasil diperbarui!");
-      setFullProfile(updatedData);
+      setFullProfile(cleanData);
       setShowEditModal(false);
       fetchDashboardData();
     } catch (e) {
       console.error("Error saving profile details:", e);
-      alert("Gagal memperbarui profil.");
+      alert("Gagal memperbarui profil: " + (e instanceof Error ? e.message : String(e)));
     } finally {
       setSavingProfile(false);
     }

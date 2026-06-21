@@ -100,9 +100,67 @@ export default function LoginPage() {
 
     try {
       if (mode === 'login') {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        const user = result.user;
+        let authResult;
+        let resolvedEmail = email;
         
+        try {
+          // Attempt standard login first
+          authResult = await signInWithEmailAndPassword(auth, email, password);
+        } catch (authErr: any) {
+          // If standard auth fails, check if there is a pre-registered student
+          const usersRef = collection(db, 'users');
+          // Query by email
+          let userSnap = await getDocs(query(usersRef, where('email', '==', email)));
+          if (userSnap.empty) {
+            // Also try querying by username
+            userSnap = await getDocs(query(usersRef, where('username', '==', email)));
+          }
+
+          if (!userSnap.empty) {
+            const userDoc = userSnap.docs[0];
+            const userData = userDoc.data();
+            
+            // Check password match (stored in DB)
+            if (userData.password === password) {
+              resolvedEmail = userData.email || `${userData.username}@gmail.com`;
+              
+              try {
+                // Try logging in with the resolved email
+                authResult = await signInWithEmailAndPassword(auth, resolvedEmail, password);
+              } catch (signInErr: any) {
+                // If sign in fails (likely account doesn't exist in auth yet), auto register!
+                if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password') {
+                  authResult = await createUserWithEmailAndPassword(auth, resolvedEmail, password);
+                } else {
+                  throw signInErr;
+                }
+              }
+
+              const user = authResult.user;
+              
+              // Move pre-created student data to their real UID doc if needed
+              if (userDoc.id !== user.uid) {
+                // Set the correct uid structure in users collection
+                await setDoc(doc(db, 'users', user.uid), {
+                  ...userData,
+                  uid: user.uid,
+                  status: 'active',
+                  lastLogin: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                }, { merge: true });
+
+                // Clean up the temporary document
+                await deleteDoc(doc(db, 'users', userDoc.id));
+              }
+            } else {
+              throw authErr; // Incorrect password
+            }
+          } else {
+            throw authErr; // Pre-created user not found and standard auth failed
+          }
+        }
+
+        const user = authResult.user;
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {

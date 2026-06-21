@@ -36,6 +36,8 @@ export default function SAWExecution() {
   const [calculating, setCalculating] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [step, setStep] = useState(1); // 1: Matrix, 2: Normalization, 3: Final Rank
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Local calculation result state
   const [normalizationMatrix, setNormalizationMatrix] = useState<{ [studentId: string]: { [criteriaId: string]: number } }>({});
@@ -134,8 +136,11 @@ export default function SAWExecution() {
     setStep(2);
   };
 
-  const publishRankings = async () => {
-    if (!window.confirm("Publikasikan hasil pemeringkatan ini ke dashboard siswa?")) return;
+  const publishRankings = () => {
+    setShowConfirmModal(true);
+  };
+
+  const executePublish = async () => {
     setPublishing(true);
     try {
       for (let i = 0; i < finalScores.length; i++) {
@@ -151,7 +156,8 @@ export default function SAWExecution() {
           updatedAt: new Date().toISOString()
         });
       }
-      alert("Peringkat berhasil diperbarui!");
+      setSuccessMessage("Peringkat berhasil diperbarui dan dipublikasikan!");
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, 'rankings');
     } finally {
@@ -361,6 +367,50 @@ export default function SAWExecution() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Custom Confirm Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2rem] p-8 max-w-md w-full border border-slate-100 shadow-2xl space-y-6">
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+              <Trophy size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-slate-900">Publikasikan Hasil?</h3>
+              <p className="text-sm text-slate-500 font-medium mt-2 leading-relaxed">
+                Yakin ingin mempublikasikan seluruh hasil pemeringkatan monitoring ini ke dashboard & halaman nilai siswa?
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 px-4 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors"
+                type="button"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  executePublish();
+                }}
+                className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors"
+                type="button"
+              >
+                Ya, Publikasikan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Success Toast notification */}
+      {successMessage && (
+        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-800 animate-bounce z-55">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          <p className="text-xs font-bold text-white leading-none">{successMessage}</p>
         </div>
       )}
     </div>

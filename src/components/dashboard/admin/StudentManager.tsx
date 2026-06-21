@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, where, doc, updateDoc, deleteDoc, setDoc, addDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
-import { Users, UserPlus, Search, MoreVertical, Edit2, Trash2, X, Loader2 } from 'lucide-react';
+import { Users, UserPlus, Search, MoreVertical, Edit2, Trash2, X, Loader2, Sparkles } from 'lucide-react';
 import { handleFirestoreError, OperationType } from '../../../lib/firebase-errors';
 import { cn } from '../../../lib/utils';
+import { classTwoInitialData } from '../../../data/class2Data';
 
 interface Student {
   uid: string;
@@ -35,6 +36,102 @@ export default function StudentManager() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
+  const [showConfirmImport, setShowConfirmImport] = useState(false);
+  const [importErrorMsg, setImportErrorMsg] = useState<string | null>(null);
+  const [importSuccessMsg, setImportSuccessMsg] = useState<string | null>(null);
+
+  const handleImportClassTwo = async () => {
+    setImporting(true);
+    setImportErrorMsg(null);
+    setImportSuccessMsg(null);
+    setImportMsg("Memulai import data...");
+    
+    try {
+      // 1. Ensure Classes exist in DB
+      setImportMsg("Menyinkronkan data kelas 2...");
+      try {
+        await setDoc(doc(db, 'classes', '2-ali-bin-abi-thalib'), {
+          name: "2 Ali bin Abi Thalib",
+          description: "Kelas 2 Ali bin Abi Thalib"
+        }, { merge: true });
+
+        await setDoc(doc(db, 'classes', '2-usman-bin-affan'), {
+          name: "2 Usman bin Affan",
+          description: "Kelas 2 Usman bin Affan"
+        }, { merge: true });
+      } catch (clsErr) {
+        console.error("Gagal menyinkronkan kelas:", clsErr);
+        throw new Error("Gagal menyinkronkan data kelas ke database: " + (clsErr instanceof Error ? clsErr.message : String(clsErr)));
+      }
+
+      // 2. Fetch existing users to avoid querying in a loop
+      setImportMsg("Mengambil daftar pengguna lama di sistem untuk sinkronisasi...");
+      const emailToDocId = new Map<string, string>();
+      const studentIdToDocId = new Map<string, string>();
+      
+      try {
+        const usersSnap = await getDocs(collection(db, 'users'));
+        usersSnap.forEach((d) => {
+          const uData = d.data();
+          if (uData.email) {
+            emailToDocId.set(String(uData.email).trim().toLowerCase(), d.id);
+          }
+          if (uData.studentId) {
+            studentIdToDocId.set(String(uData.studentId).trim(), d.id);
+          }
+        });
+      } catch (fetchErr) {
+        console.error("Gagal mengambil data siswa lama:", fetchErr);
+        throw new Error("Gagal memeriksa data siswa terdaftar: " + (fetchErr instanceof Error ? fetchErr.message : String(fetchErr)));
+      }
+
+      // 3. Insert Students
+      for (let i = 0; i < classTwoInitialData.length; i++) {
+        const student = classTwoInitialData[i];
+        setImportMsg(`Mengimport siswa (${i + 1}/${classTwoInitialData.length}): ${student.fullName}...`);
+        
+        let targetDocId = `student_${student.studentId}`;
+        
+        // Match with existing account based on email or NIS (studentId)
+        const matchedEmailId = student.email ? emailToDocId.get(student.email.trim().toLowerCase()) : null;
+        const matchedNisId = student.studentId ? studentIdToDocId.get(String(student.studentId).trim()) : null;
+        
+        if (matchedEmailId) {
+          targetDocId = matchedEmailId;
+        } else if (matchedNisId) {
+          targetDocId = matchedNisId;
+        }
+
+        // Clean undefined properties
+        const cleanStudentData = Object.fromEntries(
+          Object.entries(student).filter(([_, v]) => v !== undefined)
+        );
+
+        try {
+          await setDoc(doc(db, 'users', targetDocId), {
+            ...cleanStudentData,
+            uid: targetDocId,
+            createdAt: new Date().toISOString()
+          }, { merge: true });
+        } catch (setErr) {
+          console.error(`Gagal mengimport siswa ${student.fullName}:`, setErr);
+          throw new Error(`Gagal menulis data siswa ${student.fullName} ke database: ` + (setErr instanceof Error ? setErr.message : String(setErr)));
+        }
+      }
+
+      setImportSuccessMsg("Berhasil meng-import seluruh data 40 siswa dan membuat 40 akun kelas 2!");
+      setImportMsg(null);
+    } catch (e) {
+      console.error("Gagal total proses import:", e);
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      setImportErrorMsg(errorMsg);
+      setImportMsg(null);
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const [formData, setFormData] = useState<Omit<Student, 'uid'>>({
     fullName: '',
@@ -153,36 +250,155 @@ export default function StudentManager() {
           <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1">Manajemen Pengguna</p>
            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Data Master Siswa</h1>
         </div>
-        <button 
-          onClick={() => {
-            setEditingId(null);
-            setFormData({
-              fullName: '',
-              studentId: '',
-              nisn: '',
-              gender: 'Laki-laki',
-              religion: 'Islam',
-              semester: '1',
-              status: 'Aktif',
-              email: '',
-              class: classes[0] || '',
-              address: '',
-              phone: '',
-              birthPlace: '',
-              birthDate: '',
-              parentName: '',
-              parentJob: '',
-              parentIncome: '',
-              role: 'student'
-            });
-            setShowForm(true);
-          }}
-          className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
-        >
-          <UserPlus size={18} />
-          Tambah Siswa
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <button 
+            type="button"
+            onClick={() => {
+              setShowConfirmImport(true);
+              setImportErrorMsg(null);
+              setImportSuccessMsg(null);
+              setImportMsg(null);
+            }}
+            disabled={importing}
+            className="px-6 py-3.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-100 disabled:opacity-50 transition-all transition-duration-300"
+          >
+            {importing ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+            Import 40 Siswa Kelas 2
+          </button>
+          <button 
+            onClick={() => {
+              setEditingId(null);
+              setFormData({
+                fullName: '',
+                studentId: '',
+                nisn: '',
+                gender: 'Laki-laki',
+                religion: 'Islam',
+                semester: '1',
+                status: 'Aktif',
+                email: '',
+                class: classes[0] || '',
+                address: '',
+                phone: '',
+                birthPlace: '',
+                birthDate: '',
+                parentName: '',
+                parentJob: '',
+                parentIncome: '',
+                role: 'student'
+              });
+              setShowForm(true);
+            }}
+            className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
+          >
+            <UserPlus size={18} />
+            Tambah Siswa
+          </button>
+        </div>
       </div>
+
+      {importMsg && (
+        <div className="p-5 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-3xl text-xs font-bold animate-pulse flex items-center gap-3 shadow-sm">
+          {importing ? <Loader2 className="animate-spin text-emerald-600" size={16} /> : <Sparkles className="text-emerald-500" size={16} />}
+          {importMsg}
+        </div>
+      )}
+
+      {showConfirmImport && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                  <Sparkles size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Import Data</h3>
+                  <p className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest">Siswa Kelas 2 SDQ</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { if (!importing) setShowConfirmImport(false); }} 
+                className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-50 rounded-xl transition-colors"
+                disabled={importing}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              {!importing && !importSuccessMsg && !importErrorMsg && (
+                <p className="text-sm text-slate-600 leading-relaxed font-semibold">
+                  Apakah Anda yakin ingin meng-import <strong className="text-emerald-600 font-black">40 Data Siswa & Akun Kelas 2 SDQ Al Mahmudah</strong> secara otomatis ke dalam sistem?
+                  <span className="block mt-2 text-xs text-slate-400 font-bold">Proses ini akan mengotomatiskan pendaftaran siswa, username log-in kelas 2, serta menyelaraskan database kelas Ali bin Abi Thalib & Usman bin Affan.</span>
+                </p>
+              )}
+
+              {importing && (
+                <div className="space-y-3 py-2">
+                  <div className="flex items-center gap-3 text-emerald-600 font-black text-xs uppercase tracking-widest animate-pulse">
+                    <Loader2 className="animate-spin" size={16} />
+                    <span>Sedang memproses...</span>
+                  </div>
+                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-xs font-bold text-emerald-800">
+                    {importMsg}
+                  </div>
+                </div>
+              )}
+
+              {importSuccessMsg && (
+                <div className="p-5 bg-emerald-50 text-emerald-900 border border-emerald-100 rounded-2xl font-bold text-sm space-y-2">
+                  <div className="flex items-center gap-2 text-emerald-600">
+                    <Sparkles size={20} />
+                    <span className="font-extrabold uppercase tracking-widest text-xs">Selesai!</span>
+                  </div>
+                  <p className="text-xs text-emerald-800 font-bold leading-relaxed">{importSuccessMsg}</p>
+                </div>
+              )}
+
+              {importErrorMsg && (
+                <div className="p-5 bg-rose-50 text-rose-900 border border-rose-100 rounded-2xl font-bold text-sm space-y-2">
+                  <div className="flex items-center gap-2 text-rose-600">
+                    <X size={20} />
+                    <span className="font-extrabold uppercase tracking-widest text-xs">Gagal Meng-import</span>
+                  </div>
+                  <p className="text-xs font-semibold text-rose-800 leading-relaxed">{importErrorMsg}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              {!importing && !importSuccessMsg && !importErrorMsg ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmImport(false)}
+                    className="flex-1 py-3 text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleImportClassTwo}
+                    className="flex-1 py-3 bg-emerald-600 text-white hover:bg-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-emerald-100 flex items-center justify-center gap-2"
+                  >
+                    <Sparkles size={16} />
+                    Ya, Import
+                  </button>
+                </>
+              ) : (importSuccessMsg || importErrorMsg) && !importing ? (
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmImport(false)}
+                  className="w-full py-3.5 bg-slate-900 hover:bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                >
+                  Selesai
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
