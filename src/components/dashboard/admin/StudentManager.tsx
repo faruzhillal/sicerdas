@@ -24,6 +24,7 @@ interface Student {
   parentName?: string;
   parentJob?: string;
   parentIncome?: string;
+  dependents?: string; // Jumlah Tanggungan Orang Tua
   role: 'student';
   username?: string;
   password?: string;
@@ -152,6 +153,7 @@ export default function StudentManager() {
     parentName: '',
     parentJob: '',
     parentIncome: '',
+    dependents: '1',
     role: 'student'
   });
 
@@ -253,6 +255,7 @@ export default function StudentManager() {
         parentName: '',
         parentJob: '',
         parentIncome: '',
+        dependents: '1',
         role: 'student'
       });
     } catch (error) {
@@ -324,6 +327,7 @@ export default function StudentManager() {
                 parentName: '',
                 parentJob: '',
                 parentIncome: '',
+                dependents: '1',
                 role: 'student'
               });
               setShowForm(true);
@@ -497,18 +501,17 @@ export default function StudentManager() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Semester</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Jumlah Tanggungan</label>
                   <select 
-                    value={formData.semester || '1'}
-                    onChange={e => setFormData({ ...formData, semester: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm"
+                    value={formData.dependents || '1'}
+                    onChange={e => setFormData({ ...formData, dependents: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm font-medium text-slate-800"
                   >
-                    <option value="1">1 (Satu)</option>
-                    <option value="2">2 (Dua)</option>
-                    <option value="3">3 (Tiga)</option>
-                    <option value="4">4 (Empat)</option>
-                    <option value="5">5 (Lima)</option>
-                    <option value="6">6 (Enam)</option>
+                    <option value="1">1 Orang Anak / Jiwa</option>
+                    <option value="2">2 Orang Anak / Jiwa</option>
+                    <option value="3">3 Orang Anak / Jiwa</option>
+                    <option value="4">4 Orang Anak / Jiwa</option>
+                    <option value="5">5 Orang Anak / Jiwa atau lebih</option>
                   </select>
                 </div>
                 <div>
@@ -730,7 +733,7 @@ export default function StudentManager() {
                   </td>
                   <td className="px-6 py-4">
                     <span className="font-bold text-slate-600 block mb-1">
-                      Kelas {s.class || '-'} <span className="text-[10px] text-slate-400 font-normal">(Sem. {s.semester || '1'})</span>
+                      Kelas {s.class || '-'}
                     </span>
                     <span className={cn(
                       "inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border",
@@ -758,11 +761,16 @@ export default function StudentManager() {
                   <td className="px-6 py-4 text-xs font-semibold text-slate-700">
                     <p className="font-bold text-slate-900">{s.parentName || '-'}</p>
                     <p className="text-[10px] text-slate-500">{s.parentJob || '-'}</p>
-                    {s.parentIncome && (
-                      <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-50 text-[10px] text-emerald-700 font-bold border border-emerald-100">
-                        {s.parentIncome}
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {s.parentIncome && (
+                        <span className="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-[10px] text-emerald-700 font-bold border border-emerald-100">
+                          {s.parentIncome}
+                        </span>
+                      )}
+                      <span className="inline-block px-2 py-0.5 rounded-md bg-blue-50 text-[10px] text-blue-700 font-bold border border-blue-100">
+                        {s.dependents || '1'} Tanggungan
                       </span>
-                    )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-xs text-slate-500">{s.email}</td>
                   <td className="px-6 py-4 text-right">
@@ -787,6 +795,7 @@ export default function StudentManager() {
                             parentName: s.parentName || '',
                             parentJob: s.parentJob || '',
                             parentIncome: s.parentIncome || '',
+                            dependents: s.dependents || '1',
                             role: 'student' 
                           });
                           setShowForm(true);

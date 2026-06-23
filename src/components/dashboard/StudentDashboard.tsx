@@ -65,6 +65,7 @@ export default function StudentDashboard() {
     parentName: '',
     parentJob: '',
     parentIncome: '',
+    dependents: '1',
     email: ''
   });
 
@@ -128,9 +129,38 @@ export default function StudentDashboard() {
         }
       }
 
-      if (scoresDocSnap.exists()) {
-        setUserScores(scoresDocSnap.data());
+      let mappedIncomeValue = 50;
+      const profileIncome = userData.parentIncome || profile?.parentIncome || '';
+      if (profileIncome) {
+        const ranges = [
+          '< Rp 1.500.000',
+          'Rp 1.500.000 - Rp 3.000.000',
+          'Rp 3.000.000 - Rp 5.000.000',
+          'Rp 5.000.000 - Rp 7.500.000',
+          '> Rp 7.500.000'
+        ];
+        if (profileIncome === ranges[0]) mappedIncomeValue = 100;
+        else if (profileIncome === ranges[1]) mappedIncomeValue = 80;
+        else if (profileIncome === ranges[2]) mappedIncomeValue = 60;
+        else if (profileIncome === ranges[3]) mappedIncomeValue = 40;
+        else if (profileIncome === ranges[4]) mappedIncomeValue = 20;
       }
+
+      const dependentsCount = Number(userData.dependents || profile?.dependents || '1') || 1;
+      const mappedTanggungan = Math.min(100, Math.max(0, dependentsCount * 20 || 50));
+
+      const scoresData = scoresDocSnap.exists() ? scoresDocSnap.data() : {};
+      
+      const parsedScores = {
+        nilaiAkademik: Math.round(Number(scoresData.nilaiAkademik ?? scoresData.academic ?? scoresData.nilai_akademik ?? (scoresData.gpa ? scoresData.gpa * 10 : 80)) || 0),
+        nilaiHafalan: Math.round(Number(scoresData.nilaiHafalan ?? scoresData.tahfidz ?? scoresData.nilai_hafalan ?? scoresData.al_quran ?? 80) || 0),
+        nilaiPerilaku: Math.round(Number(scoresData.nilaiPerilaku ?? scoresData.behavior ?? scoresData.nilai_perilaku ?? scoresData.akhlak ?? 80) || 0),
+        nilaiPresensi: Math.round(Number(scoresData.nilaiPresensi ?? scoresData.attendance ?? scoresData.nilai_presensi ?? scoresData.kehadiran ?? 80) || 0),
+        nilaiPenghasilan: Math.round(Number(scoresData.nilaiPenghasilan ?? scoresData.penghasilan_orang_tua ?? mappedIncomeValue) || 50),
+        nilaiTanggungan: Math.round(Number(scoresData.nilaiTanggungan ?? scoresData.jumlah_tanggungan ?? mappedTanggungan) || 50)
+      };
+
+      setUserScores(parsedScores);
 
       // Proactively heal ranking document if it's stuck under temporary ID
       if (sId) {
@@ -159,13 +189,13 @@ export default function StudentDashboard() {
       }
 
       // 3. Average score calculation from evaluation scores
-      const sc = scoresDocSnap.exists() ? scoresDocSnap.data() : {};
       const evalKeys = ['nilaiAkademik', 'nilaiHafalan', 'nilaiPerilaku', 'nilaiPresensi', 'nilaiPenghasilan', 'nilaiTanggungan'];
       let scoreSum = 0;
       let scoreCount = 0;
       evalKeys.forEach(k => {
-        if (sc[k] !== undefined) {
-          scoreSum += Number(sc[k]);
+        const val = parsedScores[k as keyof typeof parsedScores];
+        if (val !== undefined && val !== null) {
+          scoreSum += Number(val);
           scoreCount++;
         }
       });
@@ -563,7 +593,11 @@ export default function StudentDashboard() {
                       <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Pekerjaan Orang Tua</p>
                       <p className="font-bold text-slate-900 text-sm">{fullProfile.parentJob || '-'}</p>
                     </div>
-                    <div className="sm:col-span-2">
+                    <div>
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Jumlah Tanggungan Orang Tua</p>
+                      <p className="font-bold text-slate-900 text-sm">{fullProfile.dependents || '1'} Orang Anak / Jiwa</p>
+                    </div>
+                    <div>
                       <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Estimasi Pendapatan Gaji Per Bulan</p>
                       <p className="font-black text-emerald-700 text-sm flex items-center gap-1 bg-emerald-50 px-3 py-1.5 rounded-xl w-fit">
                         <DollarSign size={14} />
@@ -686,14 +720,14 @@ export default function StudentDashboard() {
                   <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col justify-between h-40">
                     <div>
                       <div className="flex justify-between items-center mb-3">
-                        <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Kriteria Cost</span>
-                        <DollarSign size={18} className="text-amber-600" />
+                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Kriteria Prioritas</span>
+                        <DollarSign size={18} className="text-emerald-600" />
                       </div>
                       <h4 className="font-extrabold text-slate-900 text-sm">Penghasilan Orang Tua</h4>
                     </div>
                     <div>
                       <div className="flex justify-between items-end mb-1.5">
-                        <span className="text-xs text-slate-400 font-bold">Skor (Semakin rendah semakin diutamakan)</span>
+                        <span className="text-xs text-slate-400 font-bold">Skor Kebutuhan (Semakin tinggi semakin diutamakan)</span>
                         <span className="text-lg font-black text-slate-900">{userScores.nilaiPenghasilan || 0}</span>
                       </div>
                       <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -983,6 +1017,21 @@ export default function StudentDashboard() {
                       <option value="Rp 2.500.000 - Rp 5.000.000">Rp 2.500.000 - Rp 5.000.000</option>
                       <option value="Rp 5.000.000 - Rp 7.500.000">Rp 5.000.000 - Rp 7.500.000</option>
                       <option value="> Rp 7.500.000">{'> Rp 7.500.000'}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Jumlah Tanggungan Orang Tua / Wali</label>
+                    <select 
+                      value={editForm.dependents || '1'}
+                      onChange={e => setEditForm({ ...editForm, dependents: e.target.value })}
+                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm font-bold text-slate-800"
+                    >
+                      <option value="1">1 Orang Anak / Jiwa</option>
+                      <option value="2">2 Orang Anak / Jiwa</option>
+                      <option value="3">3 Orang Anak / Jiwa</option>
+                      <option value="4">4 Orang Anak / Jiwa</option>
+                      <option value="5">5 Orang Anak / Jiwa atau lebih</option>
                     </select>
                   </div>
                 </div>

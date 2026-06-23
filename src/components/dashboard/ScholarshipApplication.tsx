@@ -97,11 +97,11 @@ export default function ScholarshipApplication() {
 
         let mappedIncomeValue = 50;
         if ((profile as any)?.parentIncome) {
-          if ((profile as any).parentIncome === INCOME_RANGES[0]) mappedIncomeValue = 20;
-          else if ((profile as any).parentIncome === INCOME_RANGES[1]) mappedIncomeValue = 40;
+          if ((profile as any).parentIncome === INCOME_RANGES[0]) mappedIncomeValue = 100;
+          else if ((profile as any).parentIncome === INCOME_RANGES[1]) mappedIncomeValue = 80;
           else if ((profile as any).parentIncome === INCOME_RANGES[2]) mappedIncomeValue = 60;
-          else if ((profile as any).parentIncome === INCOME_RANGES[3]) mappedIncomeValue = 80;
-          else if ((profile as any).parentIncome === INCOME_RANGES[4]) mappedIncomeValue = 100;
+          else if ((profile as any).parentIncome === INCOME_RANGES[3]) mappedIncomeValue = 40;
+          else if ((profile as any).parentIncome === INCOME_RANGES[4]) mappedIncomeValue = 20;
         }
 
         setFormData(prev => ({
@@ -144,11 +144,11 @@ export default function ScholarshipApplication() {
   // Synchronize financial & dependent criteria calculations dynamically
   useEffect(() => {
     let mappedIncomeValue = 50;
-    if (formData.parentIncome === INCOME_RANGES[0]) mappedIncomeValue = 20;
-    else if (formData.parentIncome === INCOME_RANGES[1]) mappedIncomeValue = 40;
+    if (formData.parentIncome === INCOME_RANGES[0]) mappedIncomeValue = 100;
+    else if (formData.parentIncome === INCOME_RANGES[1]) mappedIncomeValue = 80;
     else if (formData.parentIncome === INCOME_RANGES[2]) mappedIncomeValue = 60;
-    else if (formData.parentIncome === INCOME_RANGES[3]) mappedIncomeValue = 80;
-    else if (formData.parentIncome === INCOME_RANGES[4]) mappedIncomeValue = 100;
+    else if (formData.parentIncome === INCOME_RANGES[3]) mappedIncomeValue = 40;
+    else if (formData.parentIncome === INCOME_RANGES[4]) mappedIncomeValue = 20;
 
     const dependentsCount = Number(formData.dependents) || 1;
     const mappedTanggungan = Math.min(100, Math.max(0, dependentsCount * 20 || 50));

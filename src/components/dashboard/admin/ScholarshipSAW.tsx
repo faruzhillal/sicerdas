@@ -141,7 +141,7 @@ export default function ScholarshipSAW() {
             { id: 'nilaiHafalan', name: 'Nilai Hafalan/Tahfidz', weight: wHafalan, type: 'benefit' },
             { id: 'nilaiPerilaku', name: 'Nilai Perilaku', weight: wPerilaku, type: 'benefit' },
             { id: 'nilaiPresensi', name: 'Nilai Presensi', weight: wPresensi, type: 'benefit' },
-            { id: 'nilaiPenghasilan', name: 'Penghasilan Orang Tua', weight: wPenghasilan, type: 'cost' },
+            { id: 'nilaiPenghasilan', name: 'Penghasilan Orang Tua', weight: wPenghasilan, type: 'benefit' },
             { id: 'nilaiTanggungan', name: 'Jumlah Tanggungan', weight: wTanggungan, type: 'benefit' }
           ]);
         } else {
@@ -151,7 +151,7 @@ export default function ScholarshipSAW() {
             { id: 'nilaiHafalan', name: 'Nilai Hafalan/Tahfidz', weight: 0.2, type: 'benefit' },
             { id: 'nilaiPerilaku', name: 'Nilai Perilaku', weight: 0.15, type: 'benefit' },
             { id: 'nilaiPresensi', name: 'Nilai Presensi', weight: 0.15, type: 'benefit' },
-            { id: 'nilaiPenghasilan', name: 'Penghasilan Orang Tua', weight: 0.15, type: 'cost' },
+            { id: 'nilaiPenghasilan', name: 'Penghasilan Orang Tua', weight: 0.15, type: 'benefit' },
             { id: 'nilaiTanggungan', name: 'Jumlah Tanggungan', weight: 0.15, type: 'benefit' }
           ]);
         }

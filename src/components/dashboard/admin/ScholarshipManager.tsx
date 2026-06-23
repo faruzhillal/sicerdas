@@ -277,7 +277,7 @@ export default function ScholarshipManager() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Ekonomi Cost (0-1.0)</label>
+                    <label className="block text-[10px] text-slate-500 font-bold uppercase mb-1">Ekonomi (Gaji) (0-1.0)</label>
                     <input 
                       type="number" step="0.01" min="0" max="1" required
                       value={formData.weightPenghasilan ?? 0.15}
