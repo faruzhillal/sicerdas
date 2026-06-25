@@ -1,4 +1,4 @@
-import { GraduationCap, Mail, MapPin, Phone, Instagram, Facebook, Youtube } from 'lucide-react';
+import { GraduationCap, Mail, MapPin, Phone, Instagram, Facebook, Youtube, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white">
-                <GraduationCap size={24} />
+                <Lightbulb size={24} className="text-yellow-300 fill-yellow-300 animate-pulse" />
               </div>
               <span className="text-xl font-bold text-white tracking-tight">sicerdas</span>
             </div>

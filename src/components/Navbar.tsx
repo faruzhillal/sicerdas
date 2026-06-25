@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, GraduationCap, Trophy, LogIn, LayoutDashboard, MessageSquare, Home, Calendar, Info } from 'lucide-react';
+import { Menu, X, GraduationCap, Trophy, LogIn, LayoutDashboard, MessageSquare, Home, Calendar, Info, Lightbulb } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../lib/utils';
@@ -24,8 +24,8 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform">
-                S
+              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shadow-md">
+                <Lightbulb size={22} className="text-yellow-300 fill-yellow-300" />
               </div>
               <div className="flex flex-col">
                 <h1 className="text-sm font-bold text-slate-900 leading-tight tracking-tight uppercase">SICERDAS</h1>

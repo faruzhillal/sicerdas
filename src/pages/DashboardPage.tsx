@@ -150,7 +150,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-4">
               <div className="h-8 w-1 bg-emerald-600 rounded-full mr-2"></div>
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">ScholarSPK Menu</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">SiCerdas Menu</p>
                 <h2 className="text-lg font-black text-slate-900 tracking-tight leading-none">{getPageTitle()}</h2>
               </div>
             </div>

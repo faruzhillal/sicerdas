@@ -12,7 +12,8 @@ import {
   Calculator,
   Zap,
   School,
-  Newspaper
+  Newspaper,
+  Lightbulb
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../lib/utils';
@@ -76,10 +77,10 @@ export default function Sidebar() {
       <div className="px-6 mb-8">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-emerald-100">
-            <GraduationCap size={24} />
+            <Lightbulb size={24} className="animate-pulse text-yellow-300 fill-yellow-300" />
           </div>
           <div>
-            <h1 className="text-lg font-black text-slate-900 leading-none tracking-tight">ScholarSPK</h1>
+            <h1 className="text-lg font-black text-slate-900 leading-none tracking-tight">SiCerdas</h1>
             <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
               {isAdmin ? 'Administrator' : `Siswa ${profile?.class ? 'Kelas ' + profile.class : ''}`}
             </p>

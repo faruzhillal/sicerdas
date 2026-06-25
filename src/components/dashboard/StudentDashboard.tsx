@@ -303,7 +303,7 @@ export default function StudentDashboard() {
       if (allAct.length === 0) {
         allAct.push({
           id: 'welcome',
-          title: 'Selamat datang di Portal ScholarSPK!',
+          title: 'Selamat datang di Portal SiCerdas!',
           type: 'Akademik',
           date: 'Hari ini',
           status: 'Baru'

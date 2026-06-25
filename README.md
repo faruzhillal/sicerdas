@@ -1,6 +1,6 @@
-# ScholarSPK - SDQ Al Mahmudah
+# SiCerdas - SDQ Al Mahmudah
 
-**ScholarSPK** adalah sistem informasi modern berbasis web untuk monitoring, pengolahan data kriteria, dan seleksi penerimaan beasiswa menggunakan metode **Simple Additive Weighting (SAW)** di **SDQ Al Mahmudah**. Aplikasi ini dirancang untuk memudahkan pihak sekolah dalam menyeleksi calon penerima beasiswa secara objektif, transparan, dan efisien.
+**SiCerdas** adalah sistem informasi modern berbasis web untuk monitoring, pengolahan data kriteria, dan seleksi penerimaan beasiswa menggunakan metode **Simple Additive Weighting (SAW)** di **SDQ Al Mahmudah**. Aplikasi ini dirancang untuk memudahkan pihak sekolah dalam menyeleksi calon penerima beasiswa secara objektif, transparan, dan efisien.
 
 ---
 
@@ -16,7 +16,7 @@ Sistem ini terdiri dari beberapa modul utama yang saling terintegrasi:
 ### 2. **Sistem Pendukung Keputusan (SPK-SAW)**
 *   **Kriteria Penilaian:** Konfigurasi bobot kriteria utama (Nilai Akademik, Nilai Hafalan/Tahfidz, Perilaku, Presensi, Penghasilan Orang Tua, dan Jumlah Tanggungan).
 *   **Input Nilai Evaluasi:** Pengisian data kriteria bagi setiap siswa secara cepat dan terstruktur.
-*   **Perhitungan SAW (Sistem & Simulasi):** Kalkulasi normalisasi matriks dan perangkingan otomatis untuk menentukan nilai kelayakan.
+*   **Perhitungan SAW (Sistem & Simulasi):** Kalkulasi normalisasi matriks dan perangkingan otomatis untuk menentukan nilai kelayakan secara objektif.
 
 ### 3. **Manajemen Beasiswa & Hasil**
 *   **Program Beasiswa:** Pembuatan program beasiswa aktif beserta pengaturan tanggal pendaftaran.
@@ -92,4 +92,4 @@ Pastikan Anda sudah menginstal:
 
 ## 📄 Lisensi
 
-Proyek ini dibuat dan dikembangkan untuk lingkungan internal **SDQ Al Mahmudah**. Hak Cipta © 2026. Semua Hak Dilindungi Undang-Undang.
+Proyek ini dibuat dan dikembangkan untuk lingkungan internal **SDQ Al Mahmudah** melalui platform **SiCerdas**. Hak Cipta © 2026. Semua Hak Dilindungi Undang-Undang.

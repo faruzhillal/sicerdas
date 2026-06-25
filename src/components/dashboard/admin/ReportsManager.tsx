@@ -629,7 +629,7 @@ export default function ReportsManager() {
 
           <div class="meta-info">
             <strong>Tanggal Cetak:</strong> ${todayString}<br/>
-            <strong>Dicetak Oleh:</strong> Administrator Sistem (ScholarSPK)<br/>
+            <strong>Dicetak Oleh:</strong> Administrator Sistem (SiCerdas)<br/>
             <strong>Total Rekord:</strong> ${processedData.length} Data ditemukan
           </div>
 
@@ -656,7 +656,7 @@ export default function ReportsManager() {
               <p style="font-weight: bold;">Ketua Panitia Beasiswa</p>
               <div class="signature-space"></div>
               <p class="signature-name">${window.opener?.document.querySelector('[data-admin-name]')?.textContent || 'Staff Administrasi'}</p>
-              <p>Sistem ScholarSPK</p>
+              <p>Sistem SiCerdas</p>
             </div>
           </div>
         </body>
