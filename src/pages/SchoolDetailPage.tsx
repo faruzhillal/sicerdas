@@ -21,11 +21,12 @@ export default function SchoolDetailPage() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+  const [showAllNews, setShowAllNews] = useState(false);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const q = query(collection(db, 'news'), orderBy('publishedAt', 'desc'), limit(3));
+        const q = query(collection(db, 'news'), orderBy('publishedAt', 'desc'));
         const snapshot = await getDocs(q);
         const newsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem));
         
@@ -197,8 +198,11 @@ export default function SchoolDetailPage() {
               <h2 className="text-4xl font-black text-slate-900 tracking-tight italic uppercase">Seputar <span className="text-emerald-600">Al Mahmudah</span></h2>
               <p className="text-slate-500 font-medium mt-2 max-w-xl">Ikuti terus berita terbaru and dokumentasi kegiatan menarik di sekolah kami.</p>
             </div>
-            <button className="px-6 py-3 border-2 border-slate-900 text-slate-900 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-900 hover:text-white transition-all">
-              Lihat Semua Berita
+            <button 
+              onClick={() => setShowAllNews(!showAllNews)}
+              className="px-6 py-3 border-2 border-slate-900 text-slate-900 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-900 hover:text-white transition-all cursor-pointer"
+            >
+              {showAllNews ? 'Sembunyikan Berita' : 'Lihat Semua Berita'}
             </button>
           </div>
 
@@ -210,7 +214,7 @@ export default function SchoolDetailPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {news.map((item, idx) => (
+              {(showAllNews ? news : news.slice(0, 3)).map((item, idx) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
