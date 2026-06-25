@@ -130,7 +130,7 @@ export default function StudentDashboard() {
       }
 
       let mappedIncomeValue = 50;
-      const profileIncome = userData.parentIncome || profile?.parentIncome || '';
+      const profileIncome = userData.parentIncome || (profile as any)?.parentIncome || '';
       if (profileIncome) {
         const ranges = [
           '< Rp 1.500.000',
@@ -146,7 +146,7 @@ export default function StudentDashboard() {
         else if (profileIncome === ranges[4]) mappedIncomeValue = 20;
       }
 
-      const dependentsCount = Number(userData.dependents || profile?.dependents || '1') || 1;
+      const dependentsCount = Number(userData.dependents || (profile as any)?.dependents || '1') || 1;
       const mappedTanggungan = Math.min(100, Math.max(0, dependentsCount * 20 || 50));
 
       const scoresData = scoresDocSnap.exists() ? scoresDocSnap.data() : {};

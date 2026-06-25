@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, query, where, doc, updateDoc, deleteDoc, setDoc, orderBy } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import { createNotification } from '../../../lib/notifications';
 import { Trophy, Plus, Save, Trash2, Search, Loader2, Download, Upload, X, FileSpreadsheet, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { handleFirestoreError, OperationType } from '../../../lib/firebase-errors';
 
@@ -213,6 +214,14 @@ export default function ScoreInput() {
           totalScore: totalScore / 100,
           updatedAt: new Date().toISOString()
         }, { merge: true });
+
+        await createNotification(
+          row.studentId,
+          'Nilai SPK Diperbarui',
+          'Nilai kriteria evaluasi SPK Anda telah diperbarui melalui import massal oleh Admin.',
+          'system',
+          '/dashboard'
+        );
       }
 
       setImportSuccess(`Berhasil meng-import nilai untuk ${validRows.length} siswa!`);
@@ -379,6 +388,14 @@ export default function ScoreInput() {
         totalScore: totalScore / 100,
         updatedAt: new Date().toISOString()
       }, { merge: true });
+
+      await createNotification(
+        student.id,
+        'Nilai SPK Diperbarui',
+        'Nilai kriteria evaluasi SPK Anda telah diperbarui oleh Wali Kelas/Admin.',
+        'system',
+        '/dashboard'
+      );
 
       alert(`Nilai ${student.studentName} berhasil disimpan!`);
     } catch (error) {

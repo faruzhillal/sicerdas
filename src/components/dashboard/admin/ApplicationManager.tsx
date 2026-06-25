@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, getDocs, where } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import { createNotification } from '../../../lib/notifications';
 import { GraduationCap, Clock, CheckCircle2, XCircle, Search, Filter, Loader2, User, Wallet, FileText, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { handleFirestoreError, OperationType } from '../../../lib/firebase-errors';
@@ -23,10 +24,16 @@ interface Application {
   adminComment?: string;
   spkScore?: number;
   criteriaValues?: {
-    gpa: number;
-    parentIncomeValue: number;
-    dependents: number;
-    achievements: number;
+    gpa?: number;
+    parentIncomeValue?: number;
+    dependents?: number;
+    achievements?: number;
+    nilaiAkademik?: number;
+    nilaiHafalan?: number;
+    nilaiPerilaku?: number;
+    nilaiPresensi?: number;
+    nilaiPenghasilan?: number;
+    nilaiTanggungan?: number;
   };
 }
 
@@ -88,6 +95,19 @@ export default function ApplicationManager() {
         adminComment: adminComment,
         updatedAt: new Date().toISOString()
       });
+
+      // Find application in state
+      const app = applications.find(a => a.id === id);
+      if (app) {
+        await createNotification(
+          app.studentId,
+          'Status Beasiswa Diperbarui',
+          `Pengajuan beasiswa "${app.scholarshipName}" Anda telah ${newStatus === 'approved' ? 'DISETUJUI' : 'DITOLAK'} oleh Admin.`,
+          'scholarship',
+          '/dashboard'
+        );
+      }
+
       setSelectedApp(null);
       setAdminComment('');
     } catch (error) {
@@ -299,24 +319,53 @@ export default function ApplicationManager() {
                       <Zap size={14} />
                       <p className="text-[10px] font-black uppercase tracking-widest">Data Kriteria (SPK)</p>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <div className="text-center">
-                        <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">GPA</p>
-                        <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.gpa}</p>
+                    {selectedApp.criteriaValues.nilaiAkademik !== undefined ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Nilai Akademik</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.nilaiAkademik}</p>
+                        </div>
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Nilai Hafalan</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.nilaiHafalan}</p>
+                        </div>
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Nilai Perilaku</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.nilaiPerilaku}</p>
+                        </div>
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Nilai Presensi</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.nilaiPresensi}</p>
+                        </div>
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Penghasilan</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.nilaiPenghasilan}</p>
+                        </div>
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Tanggungan</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.nilaiTanggungan}</p>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Tanggungan</p>
-                        <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.dependents}</p>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">GPA</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.gpa}</p>
+                        </div>
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Tanggungan</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.dependents}</p>
+                        </div>
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Prestasi</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.achievements}</p>
+                        </div>
+                        <div className="text-center bg-white/50 p-2 rounded-xl border border-emerald-100/50">
+                          <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Nilai Inc</p>
+                          <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.parentIncomeValue}</p>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Prestasi</p>
-                        <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.achievements}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Nilai Inc</p>
-                        <p className="text-sm font-black text-emerald-600">{selectedApp.criteriaValues.parentIncomeValue}</p>
-                      </div>
-                    </div>
+                    )}
                     <p className="mt-3 text-[8px] text-emerald-400 italic text-center">Data di atas digunakan untuk pemeringkatan SAW secara otomatis.</p>
                   </div>
                 )}

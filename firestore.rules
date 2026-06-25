@@ -130,6 +130,16 @@ service cloud.firestore {
       allow list: if false;
       allow write: if isAdmin();
     }
+
+    // 11. Notifications
+    match /notifications/{notificationId} {
+      allow read, write: if isSignedIn() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid || 
+        resource.data.userId == 'admin' || 
+        isAdmin()
+      );
+    }
     
     // Testing path
     match /test/connection {

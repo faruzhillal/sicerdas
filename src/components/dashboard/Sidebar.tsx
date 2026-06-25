@@ -21,51 +21,44 @@ export default function Sidebar() {
   const { profile, isAdmin } = useAuth();
   const location = useLocation();
 
-  const adminLinks = [
-    { name: 'Overview', icon: LayoutDashboard, path: '/dashboard' },
-    { name: 'Input Nilai SPK', icon: Trophy, path: '/dashboard/scores' },
-    { name: 'Perhitungan SAW', icon: Calculator, path: '/dashboard/saw' },
-    { name: 'Program Beasiswa', icon: GraduationCap, path: '/dashboard/scholarships' },
-    { name: 'Pengajuan Masuk', icon: FileText, path: '/dashboard/applications' },
-    { name: 'Penerima Beasiswa', icon: Trophy, path: '/dashboard/awarded' },
-    { name: 'Daftar Aduan', icon: MessageSquare, path: '/dashboard/complaints' },
-    { name: 'Data Master Siswa', icon: Users, path: '/dashboard/students' },
-    { name: 'Kriteria Penilaian', icon: Settings, path: '/dashboard/criteria' },
-    { name: 'Pengelola Akun', icon: UserCircle, path: '/dashboard/accounts' },
-  ];
-
   const adminSections = [
     {
-      title: 'Utama',
+      title: 'Navigasi Utama',
       links: [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-        { name: 'Data Siswa', icon: Users, path: '/dashboard/students' },
-        { name: 'Kelola Kelas', icon: School, path: '/dashboard/classes' },
         { name: 'Kelola Berita', icon: Newspaper, path: '/dashboard/news' },
       ]
     },
     {
-      title: 'SPK Monitoring Umum',
+      title: 'Data Master Akademik',
       links: [
-        { name: '1. Kriteria', icon: Settings, path: '/dashboard/criteria' },
-        { name: '2. Input Nilai', icon: Trophy, path: '/dashboard/scores' },
-        { name: '3. Proses SAW', icon: Calculator, path: '/dashboard/saw' },
+        { name: 'Data Siswa', icon: Users, path: '/dashboard/students' },
+        { name: 'Kelola Kelas', icon: School, path: '/dashboard/classes' },
+        { name: 'Kelola Akun', icon: UserCircle, path: '/dashboard/accounts' },
       ]
     },
-     {
-       title: 'Beasiswa & Hasil',
-       links: [
-         { name: '1. Kelola Beasiswa', icon: GraduationCap, path: '/dashboard/scholarships' },
-         { name: '2. Daftar Pengajuan', icon: FileText, path: '/dashboard/applications' },
-         { name: '3. Seleksi SAW', icon: Zap, path: '/dashboard/scholarship-saw' },
-         { name: '4. Penerima Lolos', icon: GraduationCap, path: '/dashboard/awarded' },
-       ]
-     },
     {
-      title: 'Sistem',
+      title: 'Sistem SPK (Metode SAW)',
       links: [
-        { name: 'Kelola Akun', icon: UserCircle, path: '/dashboard/accounts' },
-        { name: 'Daftar Aduan', icon: MessageSquare, path: '/dashboard/complaints' },
+        { name: 'Kriteria Penilaian', icon: Settings, path: '/dashboard/criteria' },
+        { name: 'Input Nilai Evaluasi', icon: Trophy, path: '/dashboard/scores' },
+        { name: 'Perhitungan SAW (Umum)', icon: Calculator, path: '/dashboard/saw' },
+      ]
+    },
+    {
+      title: 'Manajemen Beasiswa',
+      links: [
+        { name: 'Kelola Beasiswa', icon: GraduationCap, path: '/dashboard/scholarships' },
+        { name: 'Daftar Pengajuan', icon: FileText, path: '/dashboard/applications' },
+        { name: 'Seleksi Beasiswa (SAW)', icon: Zap, path: '/dashboard/scholarship-saw' },
+        { name: 'Penerima Lolos Seleksi', icon: Trophy, path: '/dashboard/awarded' },
+      ]
+    },
+    {
+      title: 'Layanan & Laporan',
+      links: [
+        { name: 'Cetak & Unduh Laporan', icon: FileText, path: '/dashboard/reports' },
+        { name: 'Daftar Keluhan / Aduan', icon: MessageSquare, path: '/dashboard/complaints' },
       ]
     }
   ];
@@ -87,7 +80,9 @@ export default function Sidebar() {
           </div>
           <div>
             <h1 className="text-lg font-black text-slate-900 leading-none tracking-tight">ScholarSPK</h1>
-            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Administrator</p>
+            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
+              {isAdmin ? 'Administrator' : `Siswa ${profile?.class ? 'Kelas ' + profile.class : ''}`}
+            </p>
           </div>
         </div>
       </div>

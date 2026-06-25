@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { createAdminNotification } from '../../lib/notifications';
 import { useAuth } from '../../contexts/AuthContext';
 import { GraduationCap, AlertCircle, CheckCircle2, Loader2, Info, ArrowLeft } from 'lucide-react';
 import { handleFirestoreError, OperationType } from '../../lib/firebase-errors';
@@ -203,6 +204,12 @@ export default function ScholarshipApplication() {
         status: 'pending',
         submittedAt: new Date().toISOString()
       });
+      await createAdminNotification(
+        'Pengajuan Beasiswa Baru',
+        `Siswa ${profile?.fullName || 'Siswa'} mengajukan beasiswa: "${scholarship?.name || 'Beasiswa'}"`,
+        'scholarship',
+        '/dashboard/applications'
+      );
       setSuccess(true);
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, 'scholarship_applications');

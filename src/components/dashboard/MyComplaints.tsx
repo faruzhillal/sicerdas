@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { createAdminNotification } from '../../lib/notifications';
 import { useAuth } from '../../contexts/AuthContext';
 import { MessageSquare, Clock, CheckCircle2, AlertCircle, X, User, ShieldCheck, Send, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -25,7 +26,7 @@ interface Complaint {
 }
 
 export default function MyComplaints() {
-  const { currentUser } = useAuth();
+  const { currentUser, profile } = useAuth();
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
@@ -95,10 +96,14 @@ export default function MyComplaints() {
       // 2. Alert admin by updating complaint timestamp (and maybe status back to in_progress if it was resolved but student replied)
       await updateDoc(doc(db, 'complaints', selectedComplaint.id), {
         updatedAt: serverTimestamp(),
-        // If they reply to a resolved one, it stays resolved unless admin re-opens, 
-        // or we can auto-change back to in_progress. Let's keep it in_progress if it's resolved?
-        // Actually usually resolved is terminal. Let's just update timestamp.
       });
+
+      await createAdminNotification(
+        'Pesan Baru di Aduan',
+        `Siswa ${currentUser.displayName || profile?.fullName || 'Siswa'} membalas chat aduan: "${reply.substring(0, 40)}${reply.length > 40 ? '...' : ''}"`,
+        'complaint',
+        '/dashboard/complaints'
+      );
 
       setReply('');
     } catch (error) {

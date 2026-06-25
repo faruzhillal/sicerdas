@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { createAdminNotification } from '../lib/notifications';
 import { motion } from 'motion/react';
 import { MessageSquare, Send, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { Navigate, Link } from 'react-router-dom';
@@ -23,14 +24,21 @@ export default function ComplaintsPage() {
 
     setLoading(true);
     try {
+      const studentName = profile?.fullName || 'Anonymous';
       await addDoc(collection(db, 'complaints'), {
         studentId: currentUser.uid,
-        studentName: profile?.fullName || 'Anonymous',
+        studentName,
         message,
         category,
         status: 'new',
         submittedAt: new Date().toISOString()
       });
+      await createAdminNotification(
+        'Aduan Baru Masuk',
+        `Siswa ${studentName} mengirimkan aduan: "${message.substring(0, 40)}${message.length > 40 ? '...' : ''}"`,
+        'complaint',
+        '/dashboard/complaints'
+      );
       setSubmitted(true);
       setMessage('');
     } catch (error) {

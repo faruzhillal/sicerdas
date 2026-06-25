@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, doc, updateDoc, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, doc, updateDoc, orderBy, onSnapshot, addDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import { createNotification } from '../../../lib/notifications';
 import { useAuth } from '../../../contexts/AuthContext';
-import { Search, MessageSquare, CheckCircle, Clock, X, ChevronRight, User as UserIcon, Send, Loader2 } from 'lucide-react';
+import { Search, MessageSquare, CheckCircle, Clock, X, ChevronRight, User as UserIcon, Send, Loader2, Trash2 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { handleFirestoreError, OperationType } from '../../../lib/firebase-errors';
 
@@ -37,6 +38,7 @@ export default function ComplaintManager() {
   const [reply, setReply] = useState('');
   const [saving, setSaving] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const q = query(collection(db, 'complaints'), orderBy('submittedAt', 'desc'));
@@ -97,6 +99,14 @@ export default function ComplaintManager() {
         updatedAt: serverTimestamp()
       });
 
+      await createNotification(
+        selectedComplaint.studentId,
+        'Balasan Aduan Baru',
+        `Admin membalas aduan Anda: "${reply.substring(0, 40)}${reply.length > 40 ? '...' : ''}"`,
+        'complaint',
+        '/dashboard/my-complaints'
+      );
+
       setReply('');
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `complaints/${selectedComplaint.id}/messages`);
@@ -112,9 +122,37 @@ export default function ComplaintManager() {
         status: newStatus,
         updatedAt: serverTimestamp()
       });
+
+      // Find the complaint in our state to get the studentId
+      const comp = complaints.find(c => c.id === id);
+      if (comp) {
+        await createNotification(
+          comp.studentId,
+          'Status Aduan Diperbarui',
+          `Aduan Anda tentang "${comp.category}" kini berstatus: ${newStatus === 'resolved' ? 'Selesai' : 'Sedang Diproses'}`,
+          'complaint',
+          '/dashboard/my-complaints'
+        );
+      }
+
       if (newStatus === 'resolved') setSelectedComplaint(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `complaints/${id}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteComplaint = async (id: string) => {
+    try {
+      setSaving(true);
+      await deleteDoc(doc(db, 'complaints', id));
+      setDeletingId(null);
+      if (selectedComplaint?.id === id) {
+        setSelectedComplaint(null);
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `complaints/${id}`);
     } finally {
       setSaving(false);
     }
@@ -203,12 +241,41 @@ export default function ComplaintManager() {
                     </div>
                   </td>
                   <td className="px-8 py-5 text-right">
-                    <button 
-                      onClick={() => setSelectedComplaint(c)}
-                      className="px-4 py-2 border-2 border-slate-100 text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 ml-auto hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-sm"
-                    >
-                      Respon Chat <ChevronRight size={14} />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      {deletingId === c.id ? (
+                        <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-100 rounded-xl px-2 py-1">
+                          <span className="text-[9px] font-black text-rose-600 uppercase tracking-wider">Hapus?</span>
+                          <button
+                            onClick={() => handleDeleteComplaint(c.id)}
+                            className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all"
+                          >
+                            Ya
+                          </button>
+                          <button
+                            onClick={() => setDeletingId(null)}
+                            className="px-2 py-1 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all"
+                          >
+                            Tidak
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button 
+                            onClick={() => setSelectedComplaint(c)}
+                            className="px-4 py-2 border-2 border-slate-100 text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-sm"
+                          >
+                            Respon Chat <ChevronRight size={14} />
+                          </button>
+                          <button
+                            onClick={() => setDeletingId(c.id)}
+                            className="p-2 border-2 border-slate-100 text-slate-400 hover:text-rose-600 hover:border-rose-100 hover:bg-rose-50 rounded-xl transition-all shadow-sm"
+                            title="Hapus Aduan"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
