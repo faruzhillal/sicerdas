@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Trophy, GraduationCap, ArrowRight, Star, CheckCircle2, Users, BookOpen, ShieldCheck, MessageSquare } from 'lucide-react';
+import { Trophy, GraduationCap, ArrowRight, Star, CheckCircle2, Users, BookOpen, ShieldCheck, MessageSquare, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import heroImage from '../assets/images/regenerated_image_1782052082260.jpg';
@@ -25,9 +25,9 @@ export default function HomePage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-8">
-                <ShieldCheck size={14} />
-                Portal Resmi Siswa
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-8">
+                <Lightbulb size={14} className="text-yellow-500 fill-yellow-400 animate-pulse" />
+                SiCerdas Portal Resmi
               </div>
               <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 leading-[1.1] tracking-tight mb-8">
                 Membangun Generasi <br />
