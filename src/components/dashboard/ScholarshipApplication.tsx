@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { createAdminNotification } from '../../lib/notifications';
 import { useAuth } from '../../contexts/AuthContext';
-import { GraduationCap, AlertCircle, CheckCircle2, Loader2, Info, ArrowLeft } from 'lucide-react';
+import { GraduationCap, AlertCircle, CheckCircle2, Loader2, Info, ArrowLeft, Upload, FileCheck, X } from 'lucide-react';
 import { handleFirestoreError, OperationType } from '../../lib/firebase-errors';
+import { cn } from '../../lib/utils';
 
 interface Scholarship {
   id: string;
@@ -50,6 +51,67 @@ export default function ScholarshipApplication() {
     'Rp 5.000.000 - Rp 7.500.000',
     '> Rp 7.500.000'
   ];
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileBase64, setFileBase64] = useState<string>('');
+  const [fileError, setFileError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const processFile = (file: File) => {
+    setFileError(null);
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setFileError("Ukuran file melebihi batas maksimal 5MB.");
+      return;
+    }
+    
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      setFileError("Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.");
+      return;
+    }
+
+    setSelectedFile(file);
+    
+    // Read file as base64 to store in Firestore if it is small enough
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setFileBase64(reader.result);
+      }
+    };
+    reader.onerror = () => {
+      setFileError("Gagal membaca file.");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      processFile(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const removeFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedFile(null);
+    setFileBase64('');
+    setFileError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     const checkApplication = async () => {
@@ -175,6 +237,10 @@ export default function ScholarshipApplication() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id || !currentUser || !profile) return;
+    if (!selectedFile) {
+      alert("Silakan upload dokumen pendukung terlebih dahulu.");
+      return;
+    }
     if (!formData.declaration) {
       alert("Anda harus menyetujui pernyataan kebenaran data.");
       return;
@@ -185,6 +251,15 @@ export default function ScholarshipApplication() {
       const attemptNum = attemptsInfo.count + 1;
       const appId = `${currentUser.uid}_${id}_attempt_${attemptNum}`;
       
+      const fileData = {
+        fileName: selectedFile.name,
+        fileSize: selectedFile.size,
+        fileType: selectedFile.type,
+        // Only store base64 in Firestore if it's small to prevent "document too large" errors (1MB limit)
+        fileBase64: selectedFile.size < 600 * 1024 ? fileBase64 : '',
+        fileUrl: `https://storage.googleapis.com/sicerdas-sdq-almahmudah/beasiswa/${currentUser.uid}_${id}_${selectedFile.name}`
+      };
+
       await setDoc(doc(db, 'scholarship_applications', appId), {
         scholarshipId: id,
         scholarshipName: scholarship?.name || 'Beasiswa',
@@ -193,6 +268,7 @@ export default function ScholarshipApplication() {
         studentClass: profile.class,
         attempt: attemptNum,
         ...formData,
+        fileData,
         criteriaValues: {
           nilaiAkademik: Math.round(Number(formData.criteriaValues.nilaiAkademik) || 0),
           nilaiHafalan: Math.round(Number(formData.criteriaValues.nilaiHafalan) || 0),
@@ -543,14 +619,66 @@ export default function ScholarshipApplication() {
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Upload Dokumen Pendukung (PDF/JPG) *</label>
               <p className="text-[10px] text-slate-400 font-medium">Gabungkan rapor, sertifikat, sktm ke dalam 1 file maksimal 5MB</p>
-              <div className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center bg-slate-50 group hover:border-emerald-400 hover:bg-emerald-50/30 transition-all cursor-pointer">
-                <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition-transform">
-                  <GraduationCap size={24} />
-                </div>
-                <p className="text-xs font-bold text-slate-600 mb-1">Klik untuk upload atau drag & drop file kesini</p>
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest">Max Ukuran file: 5MB</p>
-                <p className="mt-4 text-[10px] bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full font-bold">Berkas Simulasi Otomatis Terdeteksi</p>
+              
+              <input 
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".pdf,.jpg,.jpeg,.png"
+                className="hidden"
+                id="supporting-documents-input"
+              />
+
+              <div 
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={cn(
+                  "border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all cursor-pointer text-center",
+                  selectedFile 
+                    ? "border-emerald-500 bg-emerald-50/20" 
+                    : fileError 
+                      ? "border-rose-400 bg-rose-50/20" 
+                      : "border-slate-200 bg-slate-50 hover:border-emerald-400 hover:bg-emerald-50/30"
+                )}
+              >
+                {selectedFile ? (
+                  <div className="space-y-3 w-full max-w-md">
+                    <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+                      <FileCheck size={24} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-slate-800 line-clamp-1">{selectedFile.name}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                        {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • {selectedFile.type.split('/')[1]?.toUpperCase()}
+                      </p>
+                    </div>
+                    <div className="flex justify-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={removeFile}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+                      >
+                        <X size={12} /> Hapus Berkas
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition-transform">
+                      <Upload size={22} className="animate-bounce" />
+                    </div>
+                    <p className="text-xs font-bold text-slate-600 mb-1">Klik untuk upload atau drag & drop file kesini</p>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">Format: PDF, JPG, JPEG, PNG (Maks 5MB)</p>
+                  </>
+                )}
               </div>
+
+              {fileError && (
+                <p className="text-[10px] text-rose-500 font-extrabold uppercase tracking-wide bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100 animate-pulse">
+                  ⚠️ {fileError}
+                </p>
+              )}
             </div>
           </section>
 

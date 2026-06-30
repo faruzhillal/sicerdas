@@ -23,6 +23,13 @@ interface Application {
   submittedAt: string;
   adminComment?: string;
   spkScore?: number;
+  fileData?: {
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    fileBase64?: string;
+    fileUrl?: string;
+  };
   criteriaValues?: {
     gpa?: number;
     parentIncomeValue?: number;
@@ -380,6 +387,47 @@ export default function ApplicationManager() {
                     "{selectedApp.notes || 'Tidak ada catatan alasan yang diberikan.'}"
                   </div>
                 </div>
+
+                {/* Section: Berkas Pendukung */}
+                {selectedApp.fileData && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <FileText size={14} className="text-emerald-600" />
+                      <p className="text-[10px] font-black uppercase tracking-widest">Dokumen Pendukung</p>
+                    </div>
+                    <div className="flex items-center justify-between p-3.5 bg-emerald-50/40 border border-emerald-100 rounded-xl text-xs">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-[10px]">
+                          {selectedApp.fileData.fileType?.includes('pdf') ? 'PDF' : 'IMG'}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-800 max-w-[180px] truncate">{selectedApp.fileData.fileName}</p>
+                          <p className="text-[10px] text-slate-400">
+                            {selectedApp.fileData.fileSize ? `${(selectedApp.fileData.fileSize / (1024 * 1024)).toFixed(2)} MB` : 'Ukuran tidak diketahui'}
+                          </p>
+                        </div>
+                      </div>
+                      {selectedApp.fileData.fileBase64 ? (
+                        <a
+                          href={selectedApp.fileData.fileBase64}
+                          download={selectedApp.fileData.fileName}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all shadow-sm"
+                        >
+                          Unduh Berkas
+                        </a>
+                      ) : (
+                        <a
+                          href={selectedApp.fileData.fileUrl || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all shadow-sm"
+                        >
+                          Buka Link Berkas
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-4 pt-4 border-t border-slate-200">
                   <div className="space-y-2">

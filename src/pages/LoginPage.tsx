@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, deleteDoc, orderBy } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, User, LogIn, Chrome, Mail, Lock, UserPlus, KeyRound, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -26,7 +26,25 @@ export default function LoginPage() {
   const [regStep, setRegStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [classes, setClasses] = useState<string[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        const q = query(collection(db, 'classes'), orderBy('name', 'asc'));
+        const snap = await getDocs(q);
+        const list = snap.docs.map(doc => doc.data().name as string);
+        setClasses(list);
+        if (list.length > 0) {
+          setClassRoom(list[0]);
+        }
+      } catch (err) {
+        console.error("Error fetching classes in login/register:", err);
+      }
+    };
+    loadClasses();
+  }, []);
 
   const handleGoogleLogin = async () => {
     if (loading) return;
@@ -414,14 +432,27 @@ export default function LoginPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kelas</label>
-                      <input 
-                        type="text" 
-                        required={role === 'student'}
-                        value={classRoom}
-                        onChange={(e) => setClassRoom(e.target.value)}
-                        placeholder="Contoh: 1A"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
-                      />
+                      {classes.length > 0 ? (
+                        <select
+                          required={role === 'student'}
+                          value={classRoom}
+                          onChange={(e) => setClassRoom(e.target.value)}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
+                        >
+                          {classes.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input 
+                          type="text" 
+                          required={role === 'student'}
+                          value={classRoom}
+                          onChange={(e) => setClassRoom(e.target.value)}
+                          placeholder="Contoh: 1A"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium transition-all"
+                        />
+                      )}
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">NIS (No Induk)</label>
