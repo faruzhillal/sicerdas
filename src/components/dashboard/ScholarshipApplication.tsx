@@ -4,9 +4,10 @@ import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase
 import { db } from '../../lib/firebase';
 import { createAdminNotification } from '../../lib/notifications';
 import { useAuth } from '../../contexts/AuthContext';
-import { GraduationCap, AlertCircle, CheckCircle2, Loader2, Info, ArrowLeft, Upload, FileCheck, X } from 'lucide-react';
+import { GraduationCap, AlertCircle, CheckCircle2, Loader2, Info, ArrowLeft, Upload, FileCheck, X, FileText, Image } from 'lucide-react';
 import { handleFirestoreError, OperationType } from '../../lib/firebase-errors';
 import { cn } from '../../lib/utils';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface Scholarship {
   id: string;
@@ -53,8 +54,9 @@ export default function ScholarshipApplication() {
   ];
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileBase64, setFileBase64] = useState<string>('');
   const [fileError, setFileError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = (file: File) => {
@@ -73,17 +75,15 @@ export default function ScholarshipApplication() {
 
     setSelectedFile(file);
     
-    // Read file as base64 to store in Firestore if it is small enough
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setFileBase64(reader.result);
-      }
-    };
-    reader.onerror = () => {
-      setFileError("Gagal membaca file.");
-    };
-    reader.readAsDataURL(file);
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+
+    if (file.type.startsWith('image/')) {
+      setImagePreviewUrl(URL.createObjectURL(file));
+    } else {
+      setImagePreviewUrl(null);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,10 +94,17 @@ export default function ScholarshipApplication() {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       processFile(e.dataTransfer.files[0]);
     }
@@ -106,12 +113,23 @@ export default function ScholarshipApplication() {
   const removeFile = (e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedFile(null);
-    setFileBase64('');
     setFileError(null);
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+      setImagePreviewUrl(null);
+    }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
 
   useEffect(() => {
     const checkApplication = async () => {
@@ -251,12 +269,32 @@ export default function ScholarshipApplication() {
       const attemptNum = attemptsInfo.count + 1;
       const appId = `${currentUser.uid}_${id}_attempt_${attemptNum}`;
       
+      let finalBase64 = '';
+      if (selectedFile.size < 600 * 1024) {
+        try {
+          finalBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (typeof reader.result === 'string') {
+                resolve(reader.result);
+              } else {
+                resolve('');
+              }
+            };
+            reader.onerror = () => reject(new Error("Gagal membaca berkas"));
+            reader.readAsDataURL(selectedFile);
+          });
+        } catch (fileReadErr) {
+          console.error("Error converting file to base64 on submit:", fileReadErr);
+        }
+      }
+      
       const fileData = {
         fileName: selectedFile.name,
         fileSize: selectedFile.size,
         fileType: selectedFile.type,
         // Only store base64 in Firestore if it's small to prevent "document too large" errors (1MB limit)
-        fileBase64: selectedFile.size < 600 * 1024 ? fileBase64 : '',
+        fileBase64: finalBase64,
         fileUrl: `https://storage.googleapis.com/sicerdas-sdq-almahmudah/beasiswa/${currentUser.uid}_${id}_${selectedFile.name}`
       };
 
@@ -631,47 +669,85 @@ export default function ScholarshipApplication() {
 
               <div 
                 onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(
-                  "border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all cursor-pointer text-center",
-                  selectedFile 
-                    ? "border-emerald-500 bg-emerald-50/20" 
-                    : fileError 
-                      ? "border-rose-400 bg-rose-50/20" 
-                      : "border-slate-200 bg-slate-50 hover:border-emerald-400 hover:bg-emerald-50/30"
+                  "relative overflow-hidden border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer text-center min-h-[220px]",
+                  isDragging
+                    ? "border-emerald-500 bg-emerald-100/30 scale-[1.02] shadow-lg shadow-emerald-50"
+                    : selectedFile 
+                      ? "border-emerald-500 bg-emerald-50/10" 
+                      : fileError 
+                        ? "border-rose-400 bg-rose-50/10" 
+                        : "border-slate-200 bg-slate-50/50 hover:border-emerald-400 hover:bg-emerald-50/30"
                 )}
               >
-                {selectedFile ? (
-                  <div className="space-y-3 w-full max-w-md">
-                    <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
-                      <FileCheck size={24} />
-                    </div>
-                    <div>
-                      <p className="text-xs font-black text-slate-800 line-clamp-1">{selectedFile.name}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
-                        {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • {selectedFile.type.split('/')[1]?.toUpperCase()}
-                      </p>
-                    </div>
-                    <div className="flex justify-center gap-2 pt-1">
+                <AnimatePresence mode="wait">
+                  {selectedFile ? (
+                    <motion.div 
+                      key="file-uploaded"
+                      initial={{ opacity: 0, scale: 0.97, y: 3 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.97, y: -3 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                      className="space-y-4 w-full max-w-md flex flex-col items-center"
+                    >
+                      {imagePreviewUrl ? (
+                        <motion.div 
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                          className="relative group/preview w-32 h-32 rounded-xl overflow-hidden border border-slate-200 shadow-md bg-white"
+                        >
+                          <img 
+                            src={imagePreviewUrl} 
+                            alt="Preview berkas" 
+                            className="w-full h-full object-cover transition-transform duration-200 group-hover/preview:scale-105"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                            <Image className="text-white" size={20} />
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-inner">
+                          <FileText size={32} />
+                        </div>
+                      )}
+                      
+                      <div className="text-center">
+                        <p className="text-xs font-black text-slate-800 line-clamp-1 max-w-[280px] mx-auto">{selectedFile.name}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5 tracking-wider">
+                          {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • {selectedFile.type.split('/')[1]?.toUpperCase() || 'PDF'}
+                        </p>
+                      </div>
+
                       <button
                         type="button"
                         onClick={removeFile}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm hover:scale-105 active:scale-95"
                       >
                         <X size={12} /> Hapus Berkas
                       </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition-transform">
-                      <Upload size={22} className="animate-bounce" />
-                    </div>
-                    <p className="text-xs font-bold text-slate-600 mb-1">Klik untuk upload atau drag & drop file kesini</p>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">Format: PDF, JPG, JPEG, PNG (Maks 5MB)</p>
-                  </>
-                )}
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="upload-prompt"
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.12 }}
+                      className="flex flex-col items-center"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition-transform">
+                        <Upload size={22} className="animate-pulse text-emerald-500" />
+                      </div>
+                      <p className="text-xs font-bold text-slate-600 mb-1">Klik untuk upload atau drag & drop file kesini</p>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-widest">Format: PDF, JPG, JPEG, PNG (Maks 5MB)</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {fileError && (
