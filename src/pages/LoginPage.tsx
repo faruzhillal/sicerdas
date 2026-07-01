@@ -53,39 +53,75 @@ export default function LoginPage() {
     setSuccess(null);
     const provider = new GoogleAuthProvider();
     
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const cleanEmail = user.email?.trim().toLowerCase();
 
-        // Check if profile exists
-        const docRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
+      // Check if profile exists directly under user.uid
+      const docRef = doc(db, 'users', user.uid);
+      let docSnap = await getDoc(docRef);
 
-        if (!docSnap.exists()) {
-          // Create new profile with selected role
-          await setDoc(docRef, {
-            uid: user.uid,
-            fullName: user.displayName || 'New User',
-            email: user.email,
-            role: role,
-            photoURL: user.photoURL,
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            lastLogin: new Date().toISOString()
-          });
-        } else {
-          const userData = docSnap.data();
-          if (userData.status === 'inactive') {
-            await auth.signOut();
-            setError('Akun Anda telah dinonaktifkan. Silakan hubungi admin.');
-            setLoading(false);
-            return;
+      if (!docSnap.exists() && cleanEmail) {
+        // Look up pre-registered accounts in users_lookup
+        const lookupRef = doc(db, 'users_lookup', cleanEmail);
+        const lookupSnap = await getDoc(lookupRef);
+
+        if (lookupSnap.exists()) {
+          const lookupData = lookupSnap.data();
+          const tempDocRef = doc(db, 'users', lookupData.uid);
+          const tempDocSnap = await getDoc(tempDocRef);
+
+          if (tempDocSnap.exists()) {
+            const userData = tempDocSnap.data();
+            
+            // Migrate document to the Google authenticated user.uid
+            await setDoc(doc(db, 'users', user.uid), {
+              ...userData,
+              uid: user.uid,
+              fullName: user.displayName || userData.fullName || 'User',
+              photoURL: user.photoURL || userData.photoURL || '',
+              status: 'active',
+              lastLogin: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+
+            // Delete old temporary doc
+            if (lookupData.uid !== user.uid) {
+              await deleteDoc(tempDocRef);
+            }
+            
+            // Re-fetch to ensure the snapshot is loaded correctly
+            docSnap = await getDoc(docRef);
           }
-          await updateDoc(docRef, { lastLogin: new Date().toISOString() });
         }
+      }
 
-        navigate('/dashboard');
-      } catch (err: any) {
+      // If still doesn't exist, create a new student account
+      if (!docSnap.exists()) {
+        await setDoc(docRef, {
+          uid: user.uid,
+          fullName: user.displayName || 'Siswa Baru',
+          email: user.email,
+          role: 'student', // ALWAYS default to student for self-registration via Google
+          photoURL: user.photoURL,
+          status: 'active',
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+        });
+      } else {
+        const userData = docSnap.data();
+        if (userData.status === 'inactive') {
+          await auth.signOut();
+          setError('Akun Anda telah dinonaktifkan. Silakan hubungi admin.');
+          setLoading(false);
+          return;
+        }
+        await updateDoc(docRef, { lastLogin: new Date().toISOString() });
+      }
+
+      navigate('/dashboard');
+    } catch (err: any) {
       handleAuthError(err);
     } finally {
       setLoading(false);
@@ -307,7 +343,7 @@ export default function LoginPage() {
           uid: user.uid,
           fullName: fullName || (existingData as any).fullName,
           email: user.email,
-          role: role,
+          role: 'student', // ALWAYS default to student for self-registration
           class: classRoom || (existingData as any).class,
           studentId: studentId || (existingData as any).studentId,
           nisn: nisn || (existingData as any).nisn,
@@ -385,30 +421,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {mode === 'login' && (
-          <div className="flex p-1 bg-slate-100 rounded-xl mb-8">
-            <button
-              onClick={() => setRole('student')}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-black transition-all",
-                role === 'student' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
-              )}
-            >
-              <User size={14} />
-              SISWA
-            </button>
-            <button
-              onClick={() => setRole('admin')}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-black transition-all",
-                role === 'admin' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
-              )}
-            >
-              <ShieldAlert size={14} />
-              ADMIN
-            </button>
-          </div>
-        )}
+
 
         <form onSubmit={mode === 'forgot' ? handleResetPassword : handleEmailAuth} className="space-y-4 mb-8">
           {mode === 'register' && (

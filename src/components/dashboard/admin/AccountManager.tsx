@@ -49,11 +49,28 @@ export default function AccountManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const emailKey = formData.email.trim().toLowerCase();
+      const p = formData.password || 'password123';
+
       if (editingUser) {
+        // Clean up old email key if edited
+        if (editingUser.email && editingUser.email.trim().toLowerCase() !== emailKey) {
+          await deleteDoc(doc(db, 'users_lookup', editingUser.email.trim().toLowerCase()));
+        }
+
         await updateDoc(doc(db, 'users', editingUser.uid), {
           ...formData,
           updatedAt: new Date().toISOString()
         });
+
+        // Update/create users_lookup
+        await setDoc(doc(db, 'users_lookup', emailKey), {
+          uid: editingUser.uid,
+          email: emailKey,
+          username: '',
+          password: p
+        }, { merge: true });
+
       } else {
         const tempId = `user_${Date.now()}`;
         await setDoc(doc(db, 'users', tempId), {
@@ -62,6 +79,14 @@ export default function AccountManager() {
           createdAt: new Date().toISOString(),
           lastLogin: ''
         });
+
+        // Create users_lookup
+        await setDoc(doc(db, 'users_lookup', emailKey), {
+          uid: tempId,
+          email: emailKey,
+          username: '',
+          password: p
+        }, { merge: true });
       }
       setIsModalOpen(false);
       setEditingUser(null);
@@ -92,6 +117,10 @@ export default function AccountManager() {
   const handleDelete = async (uid: string) => {
     if (!window.confirm("Hapus akun ini secara permanen? Data profil akan hilang.")) return;
     try {
+      const userToDelete = users.find(u => u.uid === uid);
+      if (userToDelete && userToDelete.email) {
+        await deleteDoc(doc(db, 'users_lookup', userToDelete.email.trim().toLowerCase()));
+      }
       await deleteDoc(doc(db, 'users', uid));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, `users/${uid}`);
